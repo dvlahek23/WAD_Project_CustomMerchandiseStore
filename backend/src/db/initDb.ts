@@ -4,7 +4,7 @@ import path from 'path';
 
 sqlite3.verbose();
 
-const dbPath = path.join(__dirname, '..', '..', 'database.sqlite');
+const dbPath = path.join(__dirname, '..', '..', 'mydb.sdb');
 const schemaPath = path.join(__dirname, 'schema.sql');
 const schemaSql = readFileSync(schemaPath, 'utf-8');
 
@@ -26,3 +26,4 @@ export const db = new sqlite3.Database(dbPath, (err) => {
     });
   });
 });
+console.log("DB PATH:", dbPath);

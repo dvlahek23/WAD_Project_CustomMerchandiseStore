@@ -2,6 +2,7 @@ import express from 'express';
 import session from 'express-session';
 import cors from 'cors';
 import { db } from './db/initDb';
+import productsRouter from './routes/products';
 
 const app = express();
 
@@ -22,5 +23,7 @@ app.use(session({
 app.get('/api/hello', (_req, res) => {
   res.json({ message: 'Backend radi!' });
 });
+
+app.use('/api/products', productsRouter);
 
 export default app;
