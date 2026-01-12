@@ -1,3 +1,4 @@
+import './db/initDb';
 import app from './index';
 
 const PORT = 3000;

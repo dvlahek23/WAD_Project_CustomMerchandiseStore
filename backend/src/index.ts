@@ -1,6 +1,7 @@
 import express from 'express';
 import session from 'express-session';
 import cors from 'cors';
+import { db } from './db/initDb';
 
 const app = express();
 
@@ -17,7 +18,7 @@ app.use(session({
   saveUninitialized: false,
 }));
 
-// test endpoint
+//testni endpoint da vidim ak radi backend
 app.get('/api/hello', (_req, res) => {
   res.json({ message: 'Backend radi!' });
 });

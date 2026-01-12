@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "build": "tsc",
-  "start": "node dist/server.js",
-  "dev": "ts-node src/server.ts"
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node src/server.ts"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +24,7 @@
     "@types/express": "^5.0.6",
     "@types/express-session": "^1.18.2",
     "@types/node": "^25.0.6",
+    "@types/sqlite3": "^3.1.11",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }
