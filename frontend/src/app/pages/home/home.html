@@ -1,0 +1,64 @@
+<div class="home">
+  <section class="overview">
+    <h1>Welcome to the Custom Merchandise Store</h1>
+    <p>Create custom merchandise with your own text and colors. Perfect for personal use, teams, events, and brands.</p>
+  </section>
+
+  <section class="products">
+    <h2>Our Products</h2>
+    <div class="products-grid">
+      <article class="product-card" *ngFor="let product of products" [style.background-color]="product.color">
+        <div class="product-emoji">{{ product.emoji }}</div>
+        <h3>{{ product.name }}</h3>
+        <p class="product-price">from {{ product.price | number:'1.2-2' }} &euro;</p>
+      </article>
+    </div>
+    <button class="view-more-button" routerLink="/products">View More Products</button>
+  </section>
+
+  <section class="info-section">
+    <div class="info-card">
+      <div class="info-icon">🎨</div>
+      <h3>Custom Designs</h3>
+      <p>Add your own text and pick colors that match your team or brand.</p>
+    </div>
+    <div class="info-card">
+      <div class="info-icon">📦</div>
+      <h3>Fast Shipping</h3>
+      <p>Orders shipped within 3-5 business days across Europe.</p>
+    </div>
+  </section>
+
+  <section class="how-it-works">
+    <h2>How It Works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Choose a Product</h3>
+        <p>Browse our selection of customizable merchandise.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Add Your Design</h3>
+        <p>Enter your text and select your colors.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <h3>Place Your Order</h3>
+        <p>Review and complete your purchase.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="join-us">
+    <h2>Join Us</h2>
+    <p>Create an account and unlock exclusive benefits:</p>
+    <ul class="benefits">
+      <li>Save your designs for later</li>
+      <li>Track your orders easily</li>
+      <li>Get notified about new products</li>
+      <li>Access member-only discounts</li>
+    </ul>
+    <button class="join-button" routerLink="/register">Create an Account</button>
+  </section>
+</div>

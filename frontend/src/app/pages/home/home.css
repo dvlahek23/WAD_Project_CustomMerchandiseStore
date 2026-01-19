@@ -1,0 +1,236 @@
+.home {
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.overview {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid var(--chocolate-plum, #5a3a31);
+}
+
+.overview h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  color: #333;
+}
+
+.overview p {
+  margin: 0;
+  color: #666;
+}
+
+/* Products */
+.products h2 {
+  margin: 0 0 1.5rem;
+  font-size: 1.5rem;
+  color: #333;
+  text-align: center;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.product-card {
+  border-radius: 10px;
+  padding: 1.25rem;
+  text-align: center;
+  color: #fff;
+}
+
+.product-emoji {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.product-card h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+}
+
+.product-price {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.view-more-button {
+  display: block;
+  margin: 1.5rem auto 0;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  color: #fff;
+  background-color: var(--chocolate-plum, #5a3a31);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.view-more-button:hover {
+  opacity: 0.9;
+}
+
+/* Info Section */
+.info-section {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 2px solid var(--chocolate-plum, #5a3a31);
+}
+
+.info-card {
+  text-align: center;
+  padding: 1rem;
+}
+
+.info-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.info-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: #333;
+}
+
+.info-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* How It Works */
+.how-it-works {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 2px solid var(--chocolate-plum, #5a3a31);
+}
+
+.how-it-works h2 {
+  text-align: center;
+  margin: 0 0 1.5rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.step {
+  text-align: center;
+  padding: 1rem;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--chocolate-plum, #5a3a31);
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem;
+}
+
+.step h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: #333;
+}
+
+.step p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Join Us */
+.join-us {
+  margin-top: 2.5rem;
+  padding: 2rem;
+  border-top: 2px solid var(--chocolate-plum, #5a3a31);
+  text-align: center;
+  background-color: var(--chocolate-plum, #5a3a31);
+  border-radius: 10px;
+  color: #fff;
+}
+
+.join-us h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.join-us > p {
+  margin: 0 0 1rem;
+  opacity: 0.9;
+}
+
+.benefits {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.5rem;
+}
+
+.benefits li {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.benefits li::before {
+  content: "✓ ";
+}
+
+.join-button {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  color: var(--chocolate-plum, #5a3a31);
+  background-color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.2s ease;
+}
+
+.join-button:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 700px) {
+  .products-grid,
+  .steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .info-section {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-grid,
+  .steps {
+    grid-template-columns: 1fr;
+  }
+}

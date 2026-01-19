@@ -3,6 +3,7 @@ import session from 'express-session';
 import cors from 'cors';
 import { db } from './db/initDb';
 import productsRouter from './routes/products';
+import authRouter from './routes/auth';
 
 const app = express();
 
@@ -25,5 +26,6 @@ app.get('/api/hello', (_req, res) => {
 });
 
 app.use('/api/products', productsRouter);
+app.use('/api/auth', authRouter);
 
 export default app;

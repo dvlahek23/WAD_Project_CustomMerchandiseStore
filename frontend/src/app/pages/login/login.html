@@ -1,0 +1,45 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <h2>Login</h2>
+    <p class="auth-subtitle">
+      Welcome back! Sign in to manage your designs and orders.
+    </p>
+
+    <form #f="ngForm" (ngSubmit)="onSubmit()">
+      <div class="auth-field">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          required
+        />
+      </div>
+
+      <div class="auth-field">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          required
+        />
+      </div>
+
+      <button class="auth-btn" [disabled]="f.invalid">
+        Login
+      </button>
+
+      <div *ngIf="error" class="auth-message auth-message--error">
+        {{ error }}
+      </div>
+    </form>
+
+    <p class="auth-footer-text">
+      Don't have an account?
+      <a href="/register">Create one</a>
+    </p>
+  </div>
+</div>

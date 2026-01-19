@@ -1,1 +1,48 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --tea-green: #E2F1AF;
+  --light-gold: #E3D888;
+  --olive-wood: #84714F;
+  --chocolate-plum: #5A3A31;
+  --text-dark: #2b2118;
+  --text-muted: #5c5548;
+  --surface: #fffdf5;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--tea-green);
+  color: var(--text-dark);
+}
+
+a {
+  color: var(--chocolate-plum);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font: inherit;
+}
+
+.cms-card {
+  background: var(--light-gold);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}

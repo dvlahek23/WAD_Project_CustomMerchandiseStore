@@ -20,9 +20,9 @@ CREATE TABLE IF NOT EXISTS"mydb"."User"(
   "user_id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   "email" VARCHAR(50) NOT NULL,
   "username" VARCHAR(50) NOT NULL,
-  "password_hash" VARCHAR(50) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "password_hash" VARCHAR(255) NOT NULL,
   "role_id" INTEGER NOT NULL,
-  "created_at" DATETIME NOT NULL,
+  "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "email_UNIQUE"
     UNIQUE("email"),
   CONSTRAINT "username_UNIQUE"
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS"mydb"."Category"(
   "category_id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   "name" VARCHAR(50) NOT NULL,
   "description" VARCHAR(255) NOT NULL,
-  "manager_id" INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "manager_id" INTEGER NOT NULL,
   CONSTRAINT "manager_id"
     FOREIGN KEY("manager_id")
     REFERENCES "User"("user_id")
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS "mydb"."Product"(
   "product_id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   "name" VARCHAR(50) NOT NULL,
   "description" VARCHAR(255) NOT NULL,
-  "base_price" DECIMAL NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "base_price" DECIMAL NOT NULL,
   "product_type" VARCHAR(50) NOT NULL,
   "category_id" INTEGER NOT NULL,
   "picture_url" VARCHAR(300) NOT NULL,
@@ -75,11 +75,11 @@ CREATE TABLE IF NOT EXISTS "mydb"."DesignTemplate"(
   "template_id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   "name" VARCHAR(50) NOT NULL,
   "description" VARCHAR(50) NOT NULL,
-  "designer_id" INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "designer_id" INTEGER NOT NULL,
   "category_id" INTEGER NOT NULL,
   "preview_image_url" VARCHAR(300) NOT NULL,
   "is_approved" INTEGER,
-  "created_at" DATETIME NOT NULL,
+  "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "designer_id"
     FOREIGN KEY("designer_id")
     REFERENCES "User"("user_id"),
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS "mydb"."CustomDesign"(
   "template_id" INTEGER NOT NULL,
   "design_data" VARCHAR(255),
   "status" VARCHAR(50) NOT NULL,
-  "created_at" DATETIME NOT NULL,
+  "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "customer_id"
     FOREIGN KEY("customer_id")
     REFERENCES "User"("user_id"),
@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS "mydb"."Review"(
   "product_id" INTEGER NOT NULL,
   "rating" INTEGER,
   "comment" VARCHAR(255),
-  "created_at" DATETIME NOT NULL,
+  "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "customer_id"
     FOREIGN KEY("customer_id")
     REFERENCES "User"("user_id"),
@@ -157,11 +157,11 @@ CREATE TABLE IF NOT EXISTS "mydb"."Log"(
   "log_id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   "actor_user_id" INTEGER NOT NULL,
   "entity_type" VARCHAR(32) NOT NULL,
-  "entity_id" INTEGER DEFAULT CURRENT_TIMESTAMP,
+  "entity_id" INTEGER,
   "action" VARCHAR(50),
   "old_value" VARCHAR(255),
   "new_value" VARCHAR(255),
-  "created_at" DATETIME NOT NULL,
+  "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "actor_user_id"
     FOREIGN KEY("actor_user_id")
     REFERENCES "User"("user_id")

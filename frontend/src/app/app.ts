@@ -1,23 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { NgIf } from '@angular/common';
-import { Api } from './core/api';
+import { Component } from '@angular/core';
+import { RouterOutlet, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [NgIf],
+  imports: [RouterOutlet, RouterModule],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App implements OnInit {
-  message: string | null = null;
+export class App {
 
-  constructor(private api: Api) {}
-
-  ngOnInit(): void {
-    this.api.getHello().subscribe({
-      next: (res) => this.message = res.message,
-      error: (err) => console.error('Backend error:', err)
-    });
-  }
 }

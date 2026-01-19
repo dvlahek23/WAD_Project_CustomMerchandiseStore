@@ -1,0 +1,60 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <h2>Create account</h2>
+    <p class="auth-subtitle">
+      Set up your account to start designing custom merchandise.
+    </p>
+
+    <form #f="ngForm" (ngSubmit)="onSubmit()">
+      <div class="auth-field">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          [(ngModel)]="username"
+          name="username"
+          required
+        />
+      </div>
+
+      <div class="auth-field">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          required
+        />
+      </div>
+
+      <div class="auth-field">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          required
+        />
+      </div>
+
+      <button class="auth-btn" [disabled]="f.invalid">
+        Register
+      </button>
+
+      <div *ngIf="error" class="auth-message auth-message--error">
+        {{ error }}
+      </div>
+
+      <div *ngIf="success" class="auth-message auth-message--success">
+        {{ success }}
+      </div>
+    </form>
+
+    <p class="auth-footer-text">
+      Already have an account?
+      <a href="/login">Login here</a>
+    </p>
+  </div>
+</div>

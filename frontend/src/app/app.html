@@ -1,5 +1,24 @@
-<h1>Custom Merchandise Store</h1>
+<div class="cms-app">
+  <header class="cms-header">
+    <div class="cms-nav">
+      <a routerLink="/" class="cms-logo">
+        <img src="logo.png" alt="Logo" class="cms-logo-img">
+        <span class="cms-logo-text">Custom Merchandise Store</span>
+      </a>
 
-<p *ngIf="message">
-  Backend kaže: {{ message }}
-</p>
+      <nav class="cms-nav-links">
+        <a routerLink="/login" class="cms-nav-link cms-nav-link--primary">Login</a>
+        <a routerLink="/register" class="cms-nav-link cms-nav-link--primary">Register</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="cms-main">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="cms-footer">
+    <span>© 2026 Custom Merchandise Store</span>
+    <span>FOI · UL · Web Application Development</span>
+  </footer>
+</div>
