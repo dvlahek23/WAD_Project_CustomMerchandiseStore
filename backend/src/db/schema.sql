@@ -108,15 +108,25 @@ CREATE INDEX IF NOT EXISTS "mydb"."CustomDesign.template_id_idx" ON "CustomDesig
 CREATE TABLE IF NOT EXISTS "mydb"."Order"(
   "order_id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   "customer_id" INTEGER NOT NULL,
-  "order_date" DATETIME NOT NULL,
+  "order_date" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "total_amount" DECIMAL NOT NULL,
-  "status" VARCHAR(45) NOT NULL,
-  "payment_method" VARCHAR(45) NOT NULL,
+  "status" VARCHAR(45) NOT NULL DEFAULT 'pending_design',
+  "payment_method" VARCHAR(45),
+  "designer_id" INTEGER,
+  "designer_reviewed_at" DATETIME,
+  "paid_at" DATETIME,
+  "shipped_at" DATETIME,
+  "rejection_reason" VARCHAR(255),
   CONSTRAINT "customer_id"
     FOREIGN KEY("customer_id")
+    REFERENCES "User"("user_id"),
+  CONSTRAINT "designer_id"
+    FOREIGN KEY("designer_id")
     REFERENCES "User"("user_id")
 );
 CREATE INDEX IF NOT EXISTS "mydb"."Order.customer_id_idx" ON "Order" ("customer_id");
+CREATE INDEX IF NOT EXISTS "mydb"."Order.designer_id_idx" ON "Order" ("designer_id");
+CREATE INDEX IF NOT EXISTS "mydb"."Order.status_idx" ON "Order" ("status");
 CREATE TABLE IF NOT EXISTS "mydb"."OrderItem"(
   "order_item_id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   "order_id" INTEGER NOT NULL,
@@ -124,6 +134,17 @@ CREATE TABLE IF NOT EXISTS "mydb"."OrderItem"(
   "design_id" INTEGER,
   "quantity" INTEGER NOT NULL,
   "unit_price" DECIMAL NOT NULL,
+  "custom_text" VARCHAR(100),
+  "text_color" VARCHAR(20),
+  "text_position_x" DECIMAL,
+  "text_position_y" DECIMAL,
+  "text_width" DECIMAL,
+  "text_height" DECIMAL,
+  "custom_image" TEXT,
+  "image_position_x" DECIMAL,
+  "image_position_y" DECIMAL,
+  "image_width" DECIMAL,
+  "image_height" DECIMAL,
   CONSTRAINT "order_id"
     FOREIGN KEY("order_id")
     REFERENCES "Order"("order_id"),

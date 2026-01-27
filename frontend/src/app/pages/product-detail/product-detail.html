@@ -1,0 +1,158 @@
+<div class="product-detail-page">
+  <!-- Loading State -->
+  <div class="loading" *ngIf="loading">
+    <p>Loading product...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error" *ngIf="error">
+    <p>{{ error }}</p>
+    <a routerLink="/products" class="back-link">Back to Products</a>
+  </div>
+
+  <!-- Product Content -->
+  <div class="product-content" *ngIf="product && !loading">
+    <a routerLink="/products" class="back-link">&larr; Back to Products</a>
+
+    <div class="product-layout">
+      <!-- Product Preview -->
+      <div class="product-preview" [style.background-color]="getCategoryColor()">
+        <div class="preview-badge">{{ product.category_name }}</div>
+        <div
+          class="preview-image-container"
+          (mousemove)="onMouseMove($event)"
+          (mouseup)="onMouseUp()"
+          (mouseleave)="onMouseUp()"
+        >
+          <img [src]="product.picture_url" [alt]="product.name" class="preview-image">
+          <!-- Text Box -->
+          <div
+            class="text-box"
+            [class.dragging]="isDragging"
+            [class.resizing]="isResizing"
+            [class.has-text]="customText"
+            [style.left.%]="textBoxX"
+            [style.top.%]="textBoxY"
+            [style.width.%]="textBoxWidth"
+            [style.height.%]="textBoxHeight"
+            [style.color]="selectedColor"
+            (mousedown)="onDragStart($event)"
+          >
+            <span class="text-box-content" *ngIf="customText">{{ customText }}</span>
+            <span class="text-box-placeholder" *ngIf="!customText">Text</span>
+            <div class="resize-handle" (mousedown)="onResizeStart($event)"></div>
+          </div>
+
+          <!-- Image Box -->
+          <div
+            class="image-box"
+            *ngIf="uploadedImage"
+            [class.dragging]="isDraggingImage"
+            [class.resizing]="isResizingImage"
+            [style.left.%]="imageBoxX"
+            [style.top.%]="imageBoxY"
+            [style.width.%]="imageBoxWidth"
+            [style.height.%]="imageBoxHeight"
+            (mousedown)="onImageDragStart($event)"
+          >
+            <img [src]="uploadedImage" alt="Custom image" class="uploaded-image">
+            <div class="resize-handle" (mousedown)="onImageResizeStart($event)"></div>
+            <button class="remove-image-btn" (click)="removeUploadedImage()" title="Remove image">×</button>
+          </div>
+        </div>
+        <div class="preview-hint">Drag to move · Corner to resize</div>
+        <div class="preview-product-name">{{ product.name }}</div>
+      </div>
+
+      <!-- Product Info & Customization -->
+      <div class="product-info">
+        <h1>{{ product.name }}</h1>
+        <p class="product-description">{{ product.description }}</p>
+        <p class="product-type">Type: {{ product.product_type }}</p>
+
+        <div class="price-display">
+          <span class="base-price">€{{ product.base_price | number:'1.2-2' }}</span>
+          <span class="price-label">per item</span>
+        </div>
+
+        <!-- Customization Section -->
+        <div class="customization-section">
+          <h2>Customize Your Product</h2>
+
+          <!-- Custom Text -->
+          <div class="form-group">
+            <label for="customText">Custom Text</label>
+            <input
+              type="text"
+              id="customText"
+              [(ngModel)]="customText"
+              placeholder="Enter your custom text..."
+              maxlength="50"
+            >
+            <span class="char-count">{{ customText.length }}/50</span>
+          </div>
+
+          <!-- Color Selection -->
+          <div class="form-group">
+            <label>Text Color</label>
+            <div class="color-options">
+              <button
+                *ngFor="let color of colors"
+                class="color-btn"
+                [class.selected]="selectedColor === color.value"
+                [style.background-color]="color.value"
+                [title]="color.name"
+                (click)="selectedColor = color.value"
+              ></button>
+            </div>
+          </div>
+
+          <!-- Image Upload -->
+          <div class="form-group">
+            <label>Upload Image</label>
+            <div class="image-upload-wrapper">
+              <input
+                type="file"
+                id="imageUpload"
+                accept="image/*"
+                (change)="onImageUpload($event)"
+                class="image-upload-input"
+              >
+              <label for="imageUpload" class="image-upload-btn">
+                {{ uploadedImage ? 'Change Image' : 'Choose Image' }}
+              </label>
+              <span class="image-upload-status" *ngIf="uploadedImage">Image uploaded</span>
+            </div>
+          </div>
+
+          <!-- Quantity -->
+          <div class="form-group">
+            <label>Quantity</label>
+            <div class="quantity-selector">
+              <button class="qty-btn" (click)="decrementQuantity()" [disabled]="quantity <= 1">-</button>
+              <input type="number" [(ngModel)]="quantity" min="1" max="99" readonly>
+              <button class="qty-btn" (click)="incrementQuantity()" [disabled]="quantity >= 99">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total & Actions -->
+        <div class="order-section">
+          <div class="total-price">
+            <span class="total-label">Total:</span>
+            <span class="total-amount">€{{ totalPrice | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn btn-secondary" (click)="addToCart()">Add to Cart</button>
+            <button class="btn btn-primary" (click)="orderNow()">Order Now</button>
+          </div>
+
+          <p class="login-hint" *ngIf="!userService.isLoggedIn">
+            <a routerLink="/login">Log in</a> or <a routerLink="/register">register</a> to place an order
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

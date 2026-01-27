@@ -1,0 +1,107 @@
+/* frontend/src/app/pages/documentation/documentation.css */
+.documentation-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.documentation-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--chocolate-plum, #5a3a31);
+}
+
+.documentation-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.documentation-header p {
+  margin: 0;
+  color: #555;
+}
+
+.docs-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+.doc-card {
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  background: #f7f3ee;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.doc-card h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+.doc-card p {
+  margin: 0 0 0.75rem;
+  color: #444;
+}
+
+.doc-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.doc-actions a {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: none;
+  text-decoration: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  background-color: var(--chocolate-plum, #5a3a31);
+  color: #fff;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+}
+
+.doc-actions a:last-child {
+  background-color: #84714f;
+}
+
+.doc-actions a:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 600px) {
+  .documentation-page {
+    padding: 1.5rem 1rem;
+  }
+}
+.authors {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.author {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.author img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid var(--chocolate-plum, #5a3a31);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  margin-bottom: 0.5rem;
+}
+
+.author-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-align: center;
+}

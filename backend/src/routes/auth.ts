@@ -247,10 +247,20 @@ router.post('/designer-requests/:requestId/approve', requireAdmin, async (req, r
     [reviewerId, requestId]
   );
 
-  // Add designer type to user
+  // Remove customer type and add designer type
+  const customerType = await db.get<{ user_type_id: number }>(
+    `SELECT user_type_id FROM RegularUserType WHERE LOWER(name) = 'customer'`
+  );
   const designerType = await db.get<{ user_type_id: number }>(
     `SELECT user_type_id FROM RegularUserType WHERE LOWER(name) = 'designer'`
   );
+
+  if (customerType) {
+    await db.run(
+      `DELETE FROM User_RegularUserType WHERE user_id = ? AND user_type_id = ?`,
+      [request.user_id, customerType.user_type_id]
+    );
+  }
 
   if (designerType) {
     await db.run(

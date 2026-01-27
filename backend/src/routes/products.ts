@@ -83,4 +83,97 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// CREATE new product  (POST /api/products)
+router.post('/', async (req, res) => {
+  const { name, description, base_price, product_type, category_id, picture_url } = req.body;
+
+  if (!name || !base_price || !product_type || !category_id) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    const result = await db.run(
+      `INSERT INTO Product (name, description, base_price, product_type, category_id, picture_url)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [name, description || null, base_price, product_type, category_id, picture_url || null]
+    );
+
+    const created = await db.get(
+      `SELECT p.*, c.name as category_name
+       FROM Product p
+       JOIN Category c ON p.category_id = c.category_id
+       WHERE p.product_id = ?`,
+      [result.lastID]
+    );
+
+    res.status(201).json(created);
+  } catch (err) {
+    console.error('Error creating product:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// UPDATE product by ID (PUT /api/products/:id)
+router.put('/:id', async (req, res) => {
+  const { name, description, base_price, product_type, category_id, picture_url } = req.body;
+  const { id } = req.params;
+
+  try {
+    const existing = await db.get<any>('SELECT * FROM Product WHERE product_id = ?', [id]);
+
+    if (!existing) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    await db.run(
+      `UPDATE Product
+       SET name = ?, description = ?, base_price = ?, product_type = ?, category_id = ?, picture_url = ?
+       WHERE product_id = ?`,
+      [
+        name ?? existing.name,
+        description ?? existing.description,
+        base_price ?? existing.base_price,
+        product_type ?? existing.product_type,
+        category_id ?? existing.category_id,
+        picture_url ?? existing.picture_url,
+        id,
+      ]
+    );
+
+    const updated = await db.get(
+      `SELECT p.*, c.name AS category_name
+       FROM Product p
+       JOIN Category c ON p.category_id = c.category_id
+       WHERE p.product_id = ?`,
+      [id]
+    );
+
+    res.json(updated);
+  } catch (err) {
+    console.error('Error updating product:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
+// DELETE product by ID (DELETE /api/products/:id)
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const existing = await db.get('SELECT * FROM Product WHERE product_id = ?', [id]);
+    if (!existing) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    await db.run('DELETE FROM Product WHERE product_id = ?', [id]);
+    res.status(204).send();
+  } catch (err) {
+    console.error('Error deleting product:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 export default router;

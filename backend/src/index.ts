@@ -4,10 +4,13 @@ import cors from 'cors';
 import { db } from './db/initDb';
 import productsRouter from './routes/products';
 import authRouter from './routes/auth';
+import ordersRouter from './routes/orders';
+import reviewsRouter from './routes/reviews';
+
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 app.use(cors({
   origin: process.env.CORS_ORIGIN || true,
@@ -27,5 +30,8 @@ app.get('/api/hello', (_req, res) => {
 
 app.use('/api/products', productsRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/orders', ordersRouter);
+app.use('/api/reviews', reviewsRouter); 
+
 
 export default app;

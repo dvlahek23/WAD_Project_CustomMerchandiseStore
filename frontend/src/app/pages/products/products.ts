@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -32,7 +32,10 @@ export class Products implements OnInit {
     'Stationery': '#4A7C59',
   };
 
-  constructor(private productsService: ProductsService) {}
+  constructor(
+    private productsService: ProductsService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.loadData();
@@ -45,12 +48,14 @@ export class Products implements OnInit {
     this.productsService.getCategories().subscribe({
       next: (categories) => {
         this.categories = categories;
+        this.cdr.detectChanges();
       }
     });
 
     this.productsService.getProductTypes().subscribe({
       next: (types) => {
         this.productTypes = types;
+        this.cdr.detectChanges();
       }
     });
 
@@ -60,9 +65,11 @@ export class Products implements OnInit {
         this.products = products;
         this.filteredProducts = products;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

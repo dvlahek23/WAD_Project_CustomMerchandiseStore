@@ -1,0 +1,43 @@
+<!-- frontend/src/app/pages/documentation/documentation.html -->
+<div class="documentation-page">
+  <header class="documentation-header">
+    <h1>About & Documentation</h1>
+    <p>
+        Welcome to the Custom Merchandise Store! This platform was developed as part of the
+        Web Application Development course at FOI and UL. Our goal is to provide a seamless experience for users to
+        create and purchase custom merchandise.
+    </p>
+  </header>
+
+<section class="authors">
+  <div class="author" *ngFor="let a of authors">
+    <img [src]="a.img" alt="{{ a.name }}" />
+    <p class="author-name">{{ a.name }}</p>
+  </div>
+</section>
+
+
+  <section class="docs-list">
+    <article class="doc-card" *ngFor="let doc of docs">
+      <h2>{{ doc.title }}</h2>
+      <p>{{ doc.description }}</p>
+
+      <div class="doc-actions">
+        <a
+          [href]="getUrl(doc)"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Open in browser
+        </a>
+
+        <a
+          [href]="getUrl(doc)"
+          download
+        >
+          Download
+        </a>
+      </div>
+    </article>
+  </section>
+</div>

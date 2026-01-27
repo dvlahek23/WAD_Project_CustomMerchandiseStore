@@ -47,6 +47,9 @@
       *ngFor="let product of filteredProducts"
       [style.background-color]="getCardColor(product.category_name)"
     >
+      <div class="product-image">
+        <img [src]="product.picture_url" [alt]="product.name">
+      </div>
       <span class="product-category">{{ product.category_name }}</span>
       <h3 class="product-name">{{ product.name }}</h3>
       <p class="product-description">{{ product.description }}</p>
