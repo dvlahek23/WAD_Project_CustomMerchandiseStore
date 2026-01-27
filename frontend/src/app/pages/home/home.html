@@ -8,7 +8,6 @@
     <h2>Our Products</h2>
     <div class="products-grid">
       <article class="product-card" *ngFor="let product of products" [style.background-color]="product.color">
-        <div class="product-emoji">{{ product.emoji }}</div>
         <h3>{{ product.name }}</h3>
         <p class="product-price">from {{ product.price | number:'1.2-2' }} &euro;</p>
       </article>
@@ -18,12 +17,10 @@
 
   <section class="info-section">
     <div class="info-card">
-      <div class="info-icon">🎨</div>
       <h3>Custom Designs</h3>
       <p>Add your own text and pick colors that match your team or brand.</p>
     </div>
     <div class="info-card">
-      <div class="info-icon">📦</div>
       <h3>Fast Shipping</h3>
       <p>Orders shipped within 3-5 business days across Europe.</p>
     </div>
@@ -54,7 +51,6 @@
     <h2>Join Us</h2>
     <p>Create an account and unlock exclusive benefits:</p>
     <ul class="benefits">
-      <li>Save your designs for later</li>
       <li>Track your orders easily</li>
       <li>Get notified about new products</li>
       <li>Access member-only discounts</li>

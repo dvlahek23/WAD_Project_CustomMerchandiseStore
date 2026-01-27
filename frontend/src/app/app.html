@@ -7,8 +7,24 @@
       </a>
 
       <nav class="cms-nav-links">
-        <a routerLink="/login" class="cms-nav-link cms-nav-link--primary">Login</a>
-        <a routerLink="/register" class="cms-nav-link cms-nav-link--primary">Register</a>
+        <!-- Always visible -->
+        <a routerLink="/products" class="cms-nav-link cms-nav-link--primary">Products</a>
+
+        <!-- Guest links -->
+        <ng-container *ngIf="!userService.isLoggedIn">
+          <a routerLink="/login" class="cms-nav-link cms-nav-link--guest">Login</a>
+          <a routerLink="/register" class="cms-nav-link cms-nav-link--guest">Register</a>
+        </ng-container>
+
+        <!-- Logged in links -->
+        <ng-container *ngIf="userService.isLoggedIn">
+          <a routerLink="/profile" class="cms-nav-link cms-nav-link--profile">Profile</a>
+          <button (click)="logout()" class="cms-nav-link cms-nav-link--primary">Logout</button>
+          <div class="cms-user-info">
+            <span class="cms-username">{{ userService.user?.username }}</span>
+            <span class="cms-role">{{ roleDisplay }}</span>
+          </div>
+        </ng-container>
       </nav>
     </div>
   </header>

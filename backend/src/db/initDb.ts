@@ -8,23 +8,30 @@ const dbPath = path.join(__dirname, '..', '..', 'mydb.sdb');
 const schemaPath = path.join(__dirname, 'schema.sql');
 const schemaSql = readFileSync(schemaPath, 'utf-8');
 
+let dbReady: Promise<void>;
+
 const rawDb = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('Greška pri otvaranju SQLite baze:', err.message);
     return;
   }
   console.log('SQLite baza otvorena na:', dbPath);
+});
 
+dbReady = new Promise((resolve, reject) => {
   rawDb.serialize(() => {
     rawDb.exec(schemaSql, (err2) => {
       if (err2) {
         console.error('Greška pri izvršavanju schema.sql:', err2.message);
+        reject(err2);
       } else {
         console.log('Schema (tablice iz schema.sql) inicijalizirane.');
+        resolve();
       }
     });
   });
 });
+
 console.log("DB PATH:", dbPath);
 
 export const db = {
@@ -51,5 +58,8 @@ export const db = {
         else resolve(rows as T[]);
       });
     });
+  },
+  ready(): Promise<void> {
+    return dbReady;
   },
 };

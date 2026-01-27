@@ -1,0 +1,267 @@
+<div class="profile-page">
+  <div class="profile-card">
+    <h2>My Profile</h2>
+
+    <div class="profile-info">
+      <div class="profile-field">
+        <span class="profile-label">Username</span>
+        <span class="profile-value">{{ userService.user?.username }}</span>
+      </div>
+
+      <div class="profile-field">
+        <span class="profile-label">Email</span>
+        <span class="profile-value">{{ userService.user?.email }}</span>
+      </div>
+
+      <div class="profile-field">
+        <span class="profile-label">Role</span>
+        <span class="profile-value profile-role">{{ roleDisplay }}</span>
+      </div>
+
+      <div class="profile-field" *ngIf="userService.isRegular && userTypesDisplay">
+        <span class="profile-label">Account Type</span>
+        <span class="profile-value">{{ userTypesDisplay }}</span>
+      </div>
+    </div>
+
+    <!-- Customer: Request Designer Status (only for regular users who are customers but not designers) -->
+    <div class="profile-section" *ngIf="userService.isRegular && userService.isCustomer && !userService.isDesigner">
+      <h3>Become a Designer</h3>
+
+      <div *ngIf="!designerRequest">
+        <p class="profile-text">Want to create and sell your own designs? Request designer status!</p>
+        <button class="profile-action-btn" (click)="requestDesigner()" [disabled]="loading">
+          {{ loading ? 'Submitting...' : 'Request Designer Status' }}
+        </button>
+      </div>
+
+      <div *ngIf="designerRequest?.status === 'pending'" class="status-badge status-pending">
+        Request pending review
+      </div>
+
+      <div *ngIf="designerRequest?.status === 'denied'" class="status-badge status-denied">
+        Request was denied. You can submit a new request.
+        <button class="profile-action-btn profile-action-btn--small" (click)="requestDesigner()" [disabled]="loading">
+          Request Again
+        </button>
+      </div>
+
+      <div *ngIf="message" class="profile-message profile-message--success">{{ message }}</div>
+      <div *ngIf="error" class="profile-message profile-message--error">{{ error }}</div>
+    </div>
+
+    <!-- Management: Pending Designer Requests -->
+    <div class="profile-section" *ngIf="userService.isManagement">
+      <h3>Designer Requests</h3>
+
+      <div *ngIf="designerRequests.length === 0" class="profile-empty">
+        No pending requests
+      </div>
+
+      <div class="requests-list" *ngIf="designerRequests.length > 0">
+        <div class="request-item" *ngFor="let request of designerRequests">
+          <div class="request-info">
+            <span class="request-username">{{ request.username }}</span>
+            <span class="request-email">{{ request.email }}</span>
+            <span class="request-date">{{ request.created_at | date:'short' }}</span>
+          </div>
+          <div class="request-actions">
+            <button class="btn-approve" (click)="approveRequest(request.request_id)">Approve</button>
+            <button class="btn-deny" (click)="denyRequest(request.request_id)">Deny</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- My Orders (for non-admin users) -->
+    <div class="profile-section" *ngIf="!userService.isAdmin">
+      <h3>My Orders</h3>
+      <p class="profile-empty">You haven't placed any orders yet.</p>
+    </div>
+
+    <button class="profile-logout-btn" (click)="logout()">
+      Logout
+    </button>
+  </div>
+
+  <!-- Admin: Two Column Layout for User Management and Activity Log -->
+  <div class="admin-panels" *ngIf="userService.isAdmin">
+    <!-- Left: User Management -->
+    <div class="admin-panel">
+      <div class="section-header">
+        <h3>User Management</h3>
+      </div>
+
+      <div *ngIf="error" class="profile-message profile-message--error" style="margin-bottom: 1rem;">{{ error }}</div>
+
+      <div *ngIf="loadingUsers" class="profile-empty">
+        Loading users...
+      </div>
+
+      <div *ngIf="!loadingUsers && users.length === 0" class="profile-empty">
+        No users found
+      </div>
+
+      <div class="table-container" *ngIf="!loadingUsers && users.length > 0">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Account Type</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users">
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td>
+                <div class="role-change-container">
+                  <select
+                    class="role-select"
+                    (change)="onRoleSelect(user.user_id, $event)"
+                    [disabled]="user.user_id === userService.user?.user_id"
+                  >
+                    <option
+                      *ngFor="let role of roles"
+                      [value]="role.id"
+                      [selected]="(pendingRoleChanges.has(user.user_id) ? pendingRoleChanges.get(user.user_id) : user.role_id) === role.id"
+                    >{{ role.name }}</option>
+                  </select>
+                  <!-- User Type Selection (when changing to Regular) -->
+                  <select
+                    *ngIf="pendingRoleChanges.get(user.user_id) === 2"
+                    class="type-select"
+                    (change)="onUserTypeSelectForRole(user.user_id, $event)"
+                  >
+                    <option
+                      *ngFor="let type of userTypes"
+                      [value]="type.id"
+                      [selected]="pendingUserType.get(user.user_id) === type.id"
+                    >{{ type.name }}</option>
+                  </select>
+                  <div class="role-change-actions" *ngIf="hasPendingChange(user.user_id)">
+                    <button class="btn-confirm-role" (click)="confirmRoleChange(user.user_id)">Confirm</button>
+                    <button class="btn-cancel-role" (click)="cancelRoleChange(user.user_id)">Cancel</button>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <!-- Editable dropdown for regular users -->
+                <select
+                  *ngIf="user.role_id === 2"
+                  class="type-select"
+                  (change)="promptChangeUserType(user.user_id, $event)"
+                >
+                  <option
+                    *ngFor="let type of userTypes"
+                    [value]="type.id"
+                    [selected]="user.userTypes?.[0]?.toLowerCase() === type.name.toLowerCase()"
+                  >{{ type.name }}</option>
+                </select>
+                <span *ngIf="user.role_id !== 2">-</span>
+              </td>
+              <td>
+                <button
+                  class="btn-delete-user"
+                  (click)="promptDeleteUser(user)"
+                  [disabled]="user.user_id === userService.user?.user_id"
+                  title="Delete user"
+                >Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Delete Confirmation Modal -->
+      <div class="modal-overlay" *ngIf="userToDelete" (click)="cancelDeleteUser()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <h4>Confirm Delete</h4>
+          <p>Are you sure you want to delete user <strong>{{ userToDelete.username }}</strong>?</p>
+          <p class="modal-warning">This action cannot be undone.</p>
+          <div class="modal-actions">
+            <button class="btn-modal-cancel" (click)="cancelDeleteUser()">Cancel</button>
+            <button class="btn-modal-delete" (click)="confirmDeleteUser()">Delete</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change User Type Confirmation Modal -->
+      <div class="modal-overlay" *ngIf="userTypeChange" (click)="cancelUserTypeChange()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <h4>Confirm Account Type Change</h4>
+          <p>Are you sure you want to change <strong>{{ userTypeChange.user.username }}</strong>'s account type to <strong>{{ userTypeChange.newTypeName }}</strong>?</p>
+          <div class="modal-actions">
+            <button class="btn-modal-cancel" (click)="cancelUserTypeChange()">Cancel</button>
+            <button class="btn-modal-confirm" (click)="confirmUserTypeChange()">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Activity Log -->
+    <div class="admin-panel">
+      <div class="section-header">
+        <h3>Activity Log</h3>
+        <button class="btn-refresh" (click)="refreshLogs()" [disabled]="loadingLogs" title="Refresh">
+          <span [class.spinning]="loadingLogs">&#8635;</span>
+        </button>
+      </div>
+
+      <div *ngIf="loadingLogs" class="profile-empty">
+        Loading logs...
+      </div>
+
+      <div *ngIf="!loadingLogs && logs.length === 0" class="profile-empty">
+        No activity yet
+      </div>
+
+      <div class="table-container" *ngIf="!loadingLogs && logs.length > 0">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>User</th>
+              <th>Action</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of paginatedLogs">
+              <td>{{ log.created_at | date:'short' }}</td>
+              <td>{{ log.actor_username }}</td>
+              <td>
+                <span class="action-badge" [ngClass]="'action-' + log.action">{{ log.action }}</span>
+              </td>
+              <td>
+                <!-- Role/user type changes with target user -->
+                <span *ngIf="log.target_username && (log.old_value || log.new_value)">
+                  <span class="log-target">{{ log.target_username }}</span>: {{ log.old_value || '-' }} → {{ log.new_value || '-' }}
+                </span>
+                <!-- Actions with target user but no value change (e.g., deleted) -->
+                <span *ngIf="log.target_username && !log.old_value && !log.new_value">
+                  <span class="log-target">{{ log.target_username }}</span>
+                </span>
+                <!-- Actions without target user -->
+                <span *ngIf="!log.target_username && (log.old_value || log.new_value)">
+                  {{ log.old_value || '-' }} → {{ log.new_value || '-' }}
+                </span>
+                <!-- Fallback -->
+                <span *ngIf="!log.target_username && !log.old_value && !log.new_value">{{ log.entity_type }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pagination" *ngIf="totalLogPages > 1">
+          <button class="pagination-btn" (click)="goToLogPage(currentLogPage - 1)" [disabled]="currentLogPage === 1">&laquo; Prev</button>
+          <span class="pagination-info">Page {{ currentLogPage }} of {{ totalLogPages }}</span>
+          <button class="pagination-btn" (click)="goToLogPage(currentLogPage + 1)" [disabled]="currentLogPage === totalLogPages">Next &raquo;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -14,7 +14,15 @@
           [(ngModel)]="email"
           name="email"
           required
+          email
+          #emailField="ngModel"
+          [class.input-error]="emailField.invalid && emailField.touched"
+          [class.input-valid]="emailField.valid && emailField.touched"
         />
+        <div class="field-errors" *ngIf="emailField.touched && emailField.invalid">
+          <span class="field-error" *ngIf="emailField.errors?.['required']">Email is required</span>
+          <span class="field-error" *ngIf="emailField.errors?.['email']">Please enter a valid email address</span>
+        </div>
       </div>
 
       <div class="auth-field">
@@ -25,7 +33,13 @@
           [(ngModel)]="password"
           name="password"
           required
+          #passwordField="ngModel"
+          [class.input-error]="passwordField.invalid && passwordField.touched"
+          [class.input-valid]="passwordField.valid && passwordField.touched"
         />
+        <div class="field-errors" *ngIf="passwordField.touched && passwordField.invalid">
+          <span class="field-error" *ngIf="passwordField.errors?.['required']">Password is required</span>
+        </div>
       </div>
 
       <button class="auth-btn" [disabled]="f.invalid">

@@ -20,7 +20,7 @@ app.use(session({
   saveUninitialized: false,
 }));
 
-//testni endpoint da vidim ak radi backend
+
 app.get('/api/hello', (_req, res) => {
   res.json({ message: 'Backend radi!' });
 });

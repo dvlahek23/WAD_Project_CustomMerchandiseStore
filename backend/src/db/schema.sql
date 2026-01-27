@@ -167,4 +167,19 @@ CREATE TABLE IF NOT EXISTS "mydb"."Log"(
     REFERENCES "User"("user_id")
 );
 CREATE INDEX IF NOT EXISTS "mydb"."Log.actor_user_id_idx" ON "Log" ("actor_user_id");
+CREATE TABLE IF NOT EXISTS "mydb"."DesignerRequest"(
+  "request_id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  "user_id" INTEGER NOT NULL,
+  "status" VARCHAR(20) NOT NULL DEFAULT 'pending',
+  "reviewed_by" INTEGER,
+  "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "reviewed_at" DATETIME,
+  CONSTRAINT "user_id"
+    FOREIGN KEY("user_id")
+    REFERENCES "User"("user_id"),
+  CONSTRAINT "reviewed_by"
+    FOREIGN KEY("reviewed_by")
+    REFERENCES "User"("user_id")
+);
+CREATE INDEX IF NOT EXISTS "mydb"."DesignerRequest.user_id_idx" ON "DesignerRequest" ("user_id");
 COMMIT;

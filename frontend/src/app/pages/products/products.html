@@ -1,0 +1,68 @@
+<div class="products-page">
+  <header class="products-header">
+    <h1>Our Products</h1>
+    <p>Browse our collection of customizable merchandise</p>
+  </header>
+
+  <section class="filters">
+    <div class="filter-group">
+      <label for="category">Category</label>
+      <select id="category" [(ngModel)]="selectedCategory" (change)="applyFilters()">
+        <option value="">All Categories</option>
+        <option *ngFor="let cat of categories" [value]="cat.name">{{ cat.name }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="type">Product Type</label>
+      <select id="type" [(ngModel)]="selectedType" (change)="applyFilters()">
+        <option value="">All Types</option>
+        <option *ngFor="let type of productTypes" [value]="type">{{ type }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group search-group">
+      <label for="search">Search</label>
+      <input
+        type="text"
+        id="search"
+        [(ngModel)]="searchQuery"
+        (input)="applyFilters()"
+        placeholder="Search products..."
+      >
+    </div>
+
+    <button class="clear-filters-btn" (click)="clearFilters()" *ngIf="selectedCategory || selectedType || searchQuery">
+      Clear Filters
+    </button>
+  </section>
+
+  <div class="results-info" *ngIf="!loading">
+    <span>Showing {{ filteredProducts.length }} of {{ products.length }} products</span>
+  </div>
+
+  <section class="products-grid" *ngIf="!loading">
+    <article
+      class="product-card"
+      *ngFor="let product of filteredProducts"
+      [style.background-color]="getCardColor(product.category_name)"
+    >
+      <span class="product-category">{{ product.category_name }}</span>
+      <h3 class="product-name">{{ product.name }}</h3>
+      <p class="product-description">{{ product.description }}</p>
+      <p class="product-price">from {{ product.base_price | number:'1.2-2' }} &euro;</p>
+      <button class="customize-btn" routerLink="/products/{{ product.product_id }}">
+        Customize
+      </button>
+    </article>
+  </section>
+
+  <div class="loading" *ngIf="loading">
+    <p>Loading products...</p>
+  </div>
+
+  <div class="no-results" *ngIf="!loading && filteredProducts.length === 0">
+    <p>No products found matching your criteria.</p>
+    <button class="clear-filters-btn" (click)="clearFilters()">Clear Filters</button>
+  </div>
+</div>

@@ -5,16 +5,24 @@
       Set up your account to start designing custom merchandise.
     </p>
 
-    <form #f="ngForm" (ngSubmit)="onSubmit()">
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
       <div class="auth-field">
         <label for="username">Username</label>
         <input
           id="username"
           type="text"
-          [(ngModel)]="username"
-          name="username"
-          required
+          formControlName="username"
+          [class.input-error]="username?.invalid && username?.touched"
+          [class.input-valid]="username?.valid && username?.touched"
         />
+        <div class="field-errors" *ngIf="username?.touched">
+          <span class="field-error" *ngIf="username?.errors?.['required']">Username is required</span>
+          <span class="field-error" *ngIf="username?.errors?.['minlength']">Username must be at least 3 characters</span>
+          <span class="field-error" *ngIf="username?.errors?.['maxlength']">Username cannot exceed 50 characters</span>
+          <span class="field-error" *ngIf="username?.errors?.['pattern']">Username can only contain letters, numbers, and underscores</span>
+          <span class="field-error" *ngIf="username?.errors?.['usernameTaken']">Username is already taken</span>
+          <span class="status-checking" *ngIf="username?.pending">Checking availability...</span>
+        </div>
       </div>
 
       <div class="auth-field">
@@ -22,10 +30,17 @@
         <input
           id="email"
           type="email"
-          [(ngModel)]="email"
-          name="email"
-          required
+          formControlName="email"
+          [class.input-error]="email?.invalid && email?.touched"
+          [class.input-valid]="email?.valid && email?.touched"
         />
+        <div class="field-errors" *ngIf="email?.touched">
+          <span class="field-error" *ngIf="email?.errors?.['required']">Email is required</span>
+          <span class="field-error" *ngIf="email?.errors?.['email']">Please enter a valid email address</span>
+          <span class="field-error" *ngIf="email?.errors?.['maxlength']">Email cannot exceed 50 characters</span>
+          <span class="field-error" *ngIf="email?.errors?.['emailTaken']">Email is already registered</span>
+          <span class="status-checking" *ngIf="email?.pending">Checking availability...</span>
+        </div>
       </div>
 
       <div class="auth-field">
@@ -33,13 +48,16 @@
         <input
           id="password"
           type="password"
-          [(ngModel)]="password"
-          name="password"
-          required
+          formControlName="password"
+          [class.input-error]="password?.invalid && password?.touched"
+          [class.input-valid]="password?.valid && password?.touched"
         />
+        <div class="field-errors" *ngIf="password?.touched">
+          <span class="field-error" *ngIf="password?.errors?.['required']">Password is required</span>
+        </div>
       </div>
 
-      <button class="auth-btn" [disabled]="f.invalid">
+      <button class="auth-btn" [disabled]="registerForm.invalid || registerForm.pending">
         Register
       </button>
 

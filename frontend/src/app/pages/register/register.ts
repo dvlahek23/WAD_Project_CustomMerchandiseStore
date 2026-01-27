@@ -1,34 +1,60 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/auth';
+import { AuthValidators } from '../../core/validators/auth.validators';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './register.html',
   styleUrls: ['./register.css']
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
 
-  username: string = '';
-  email: string = '';
-  password: string = '';
+  registerForm!: FormGroup;
   error: string = '';
   success: string = '';
 
   constructor(
+    private fb: FormBuilder,
     private auth: AuthService,
+    private authValidators: AuthValidators,
     private router: Router
   ) {}
 
+  ngOnInit() {
+    this.registerForm = this.fb.group({
+      username: ['',
+        [Validators.required, Validators.minLength(3), Validators.maxLength(50), Validators.pattern(/^[a-zA-Z0-9_]+$/)],
+        [this.authValidators.usernameAvailableValidator()]
+      ],
+      email: ['',
+        [Validators.required, Validators.email, Validators.maxLength(50)],
+        [this.authValidators.emailAvailableValidator()]
+      ],
+      password: ['', [Validators.required]]
+    });
+  }
+
+  get username() { return this.registerForm.get('username'); }
+  get email() { return this.registerForm.get('email'); }
+  get password() { return this.registerForm.get('password'); }
+
   onSubmit() {
+    if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched();
+      return;
+    }
+
     this.error = '';
     this.success = '';
 
-    this.auth.register(this.username, this.email, this.password).subscribe({
+    const { username, email, password } = this.registerForm.value;
+
+    this.auth.register(username, email, password).subscribe({
       next: () => {
         this.success = 'Registration successful! Redirecting to login...';
         setTimeout(() => this.router.navigateByUrl('/login'), 1500);

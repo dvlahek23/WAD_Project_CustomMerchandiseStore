@@ -32,7 +32,7 @@
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
 }
 
@@ -65,7 +65,7 @@
   padding: 0.75rem 2rem;
   font-size: 1rem;
   color: #fff;
-  background-color: var(--chocolate-plum, #5a3a31);
+  background-color: var(--chocolate-plum, #722F37);
   border: none;
   border-radius: 6px;
   cursor: pointer;

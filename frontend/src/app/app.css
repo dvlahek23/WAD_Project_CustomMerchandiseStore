@@ -44,6 +44,30 @@
   align-items: center;
 }
 
+.cms-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 0.5rem;
+  padding-left: 1rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.cms-username {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #fdf8f2;
+}
+
+.cms-role {
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  color: #fdf8f2;
+  font-weight: 500;
+}
+
 .cms-nav-link {
   font-size: 0.9rem;
   padding: 0.35rem 0.75rem;
@@ -61,6 +85,33 @@
 .cms-nav-link--primary {
   background: #f7e4a5;
   color: var(--chocolate-plum);
+  font-weight: bold;
+}
+
+.cms-nav-link--profile {
+  background: #ffffff;
+  color: var(--chocolate-plum);
+  font-weight: bold;
+}
+
+
+
+.cms-nav-link--guest {
+  font-weight: bold;
+  background: #ffffff;
+  color: var(--chocolate-plum);
+}
+
+.cms-nav-link--logout {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.cms-nav-link--logout:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .cms-main {
