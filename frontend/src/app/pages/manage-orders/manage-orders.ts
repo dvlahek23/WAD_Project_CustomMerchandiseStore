@@ -31,7 +31,6 @@ export class ManageOrders implements OnInit {
   loadOrders() {
     this.loading = true;
 
-    // Load pending shipment orders
     this.ordersService.getPendingShipmentOrders().subscribe({
       next: (orders) => {
         this.pendingOrders = orders;
@@ -43,7 +42,6 @@ export class ManageOrders implements OnInit {
       }
     });
 
-    // Load all orders
     this.ordersService.getAllOrders().subscribe({
       next: (orders) => {
         this.allOrders = orders;

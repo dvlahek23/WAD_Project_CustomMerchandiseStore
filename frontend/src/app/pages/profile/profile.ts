@@ -32,20 +32,17 @@ export class ProfileComponent implements OnInit {
     { id: 1, name: 'Customer' },
     { id: 2, name: 'Designer' }
   ];
-  pendingRoleChanges: Map<number, number> = new Map(); // userId -> new roleId
-  pendingUserType: Map<number, number> = new Map(); // userId -> selected userTypeId (1=customer, 2=designer)
+  pendingRoleChanges: Map<number, number> = new Map();
+  pendingUserType: Map<number, number> = new Map();
   loading = false;
   message = '';
   error = '';
 
-  // Pagination for activity log
   logsPerPage = 10;
   currentLogPage = 1;
 
-  // Delete user confirmation
   userToDelete: any = null;
 
-  // Change user type confirmation
   userTypeChange: { user: any, newTypeId: number, newTypeName: string } | null = null;
 
   constructor(
@@ -56,11 +53,9 @@ export class ProfileComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // If user is already loaded, load data immediately
     if (this.userService.user) {
       this.loadRoleSpecificData();
     } else {
-      // Otherwise wait for user to be loaded
       this.userService.user$.pipe(
         filter(user => user !== null),
         take(1)
@@ -72,7 +67,6 @@ export class ProfileComponent implements OnInit {
   }
 
   loadRoleSpecificData() {
-    // Regular user who is a customer but not designer: load their designer request status
     if (this.userService.isRegular && this.userService.isCustomer && !this.userService.isDesigner) {
       this.authService.getMyDesignerRequest().subscribe({
         next: (request) => {
@@ -83,7 +77,6 @@ export class ProfileComponent implements OnInit {
       });
     }
 
-    // Management: load pending designer requests
     if (this.userService.isManagement) {
       this.authService.getDesignerRequests().subscribe({
         next: (requests) => {
@@ -94,7 +87,6 @@ export class ProfileComponent implements OnInit {
       });
     }
 
-    // Admin: load logs and users automatically
     if (this.userService.isAdmin) {
       this.loadLogs();
       this.loadUsers();
@@ -163,9 +155,8 @@ export class ProfileComponent implements OnInit {
 
     if (user && user.role_id !== newRoleId) {
       this.pendingRoleChanges.set(userId, newRoleId);
-      // If changing to Regular, default to Customer
       if (newRoleId === 2) {
-        this.pendingUserType.set(userId, 1); // Default to Customer
+        this.pendingUserType.set(userId, 1);
       } else {
         this.pendingUserType.delete(userId);
       }
@@ -200,7 +191,6 @@ export class ProfileComponent implements OnInit {
     this.error = '';
     const userType = this.pendingUserType.get(userId);
 
-    // If changing to Regular and no type selected, show error
     if (roleId === 2 && !userType) {
       this.error = 'Please select an account type';
       return;
@@ -208,7 +198,6 @@ export class ProfileComponent implements OnInit {
 
     this.authService.updateUserRole(userId, roleId).subscribe({
       next: () => {
-        // If role is Regular, set the user type
         if (roleId === 2 && userType) {
           this.authService.addUserType(userId, userType).subscribe({
             next: () => {
@@ -240,7 +229,6 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  // Prompt to change user type (for existing regular users)
   promptChangeUserType(userId: number, event: Event) {
     const select = event.target as HTMLSelectElement;
     const newTypeId = parseInt(select.value);
@@ -248,7 +236,6 @@ export class ProfileComponent implements OnInit {
 
     if (!user) return;
 
-    // Get current type id
     const currentType = user.userTypes?.[0]?.toLowerCase();
     const currentTypeId = currentType === 'customer' ? 1 : currentType === 'designer' ? 2 : 0;
 
@@ -261,7 +248,7 @@ export class ProfileComponent implements OnInit {
 
   cancelUserTypeChange() {
     this.userTypeChange = null;
-    this.loadUsers(); // Reload to reset dropdown
+    this.loadUsers();
   }
 
   confirmUserTypeChange() {
@@ -270,13 +257,11 @@ export class ProfileComponent implements OnInit {
     const { user, newTypeId } = this.userTypeChange;
     const userId = user.user_id;
 
-    // Get current type id
     const currentType = user.userTypes?.[0]?.toLowerCase();
     const currentTypeId = currentType === 'customer' ? 1 : currentType === 'designer' ? 2 : 0;
 
     this.error = '';
 
-    // Remove old type first, then add new type
     if (currentTypeId > 0) {
       this.authService.removeUserType(userId, currentTypeId).subscribe({
         next: () => {
@@ -300,7 +285,6 @@ export class ProfileComponent implements OnInit {
         }
       });
     } else {
-      // No existing type, just add
       this.authService.addUserType(userId, newTypeId).subscribe({
         next: () => {
           this.userTypeChange = null;
@@ -419,15 +403,12 @@ export class ProfileComponent implements OnInit {
   exportLogsToPdf() {
     const doc = new jsPDF();
 
-    // Title
     doc.setFontSize(18);
     doc.text('Activity Log Report', 14, 22);
 
-    // Date
     doc.setFontSize(10);
     doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 30);
 
-    // Prepare table data
     const tableData = this.logs.map(log => {
       const date = new Date(log.created_at).toLocaleString();
       const action = log.action || '-';
@@ -446,7 +427,6 @@ export class ProfileComponent implements OnInit {
       return [date, log.actor_username, action, details];
     });
 
-    // Create table
     autoTable(doc, {
       startY: 38,
       head: [['Date', 'User', 'Action', 'Details']],
@@ -456,7 +436,6 @@ export class ProfileComponent implements OnInit {
       alternateRowStyles: { fillColor: [248, 248, 248] },
     });
 
-    // Save PDF
     doc.save('activity-log.pdf');
   }
 }

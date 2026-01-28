@@ -37,7 +37,6 @@ router.post('/register', async (req, res) => {
 
   const hashed = await bcrypt.hash(password, 10);
 
-  // Get the regular role ID by name (case-insensitive)
   const regularRole = await db.get<{ role_id: number }>(
     `SELECT role_id FROM Role WHERE LOWER(name) = 'regular'`
   );
@@ -51,7 +50,6 @@ router.post('/register', async (req, res) => {
     [email, username, hashed, regularRole.role_id]
   );
 
-  // Get the customer type ID by name (case-insensitive)
   const customerType = await db.get<{ user_type_id: number }>(
     `SELECT user_type_id FROM RegularUserType WHERE LOWER(name) = 'customer'`
   );
@@ -69,7 +67,7 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  
+
   const user = await db.get<User>(
     `SELECT * FROM User WHERE email = ?`,
     [email]
@@ -114,7 +112,6 @@ router.get('/check-email/:email', async (req, res) => {
   res.json({ available: !exists });
 });
 
-// Middleware to check if user is logged in
 const requireAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   if (!req.session.userId) {
     return res.status(401).json({ error: 'Not authenticated' });
@@ -122,7 +119,6 @@ const requireAuth = (req: express.Request, res: express.Response, next: express.
   next();
 };
 
-// Middleware to check if user is admin or management
 const requireAdmin = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   if (!req.session.userId) {
     return res.status(401).json({ error: 'Not authenticated' });
@@ -142,7 +138,6 @@ const requireAdmin = async (req: express.Request, res: express.Response, next: e
   next();
 };
 
-// Helper to log actions
 async function logAction(actorUserId: number, entityType: string, entityId: number | null, action: string, oldValue?: string | null, newValue?: string | null) {
   await db.run(
     `INSERT INTO Log (actor_user_id, entity_type, entity_id, action, old_value, new_value, created_at)
@@ -151,11 +146,9 @@ async function logAction(actorUserId: number, entityType: string, entityId: numb
   );
 }
 
-// Request designer status (for customers)
 router.post('/request-designer', requireAuth, async (req, res) => {
   const userId = req.session.userId!;
 
-  // Check if already a designer
   const designerType = await db.get<{ user_type_id: number }>(
     `SELECT user_type_id FROM RegularUserType WHERE LOWER(name) = 'designer'`
   );
@@ -171,7 +164,6 @@ router.post('/request-designer', requireAuth, async (req, res) => {
     }
   }
 
-  // Check if already has a pending request
   const pendingRequest = await db.get(
     `SELECT * FROM DesignerRequest WHERE user_id = ? AND status = 'pending'`,
     [userId]
@@ -181,7 +173,6 @@ router.post('/request-designer', requireAuth, async (req, res) => {
     return res.status(400).json({ error: 'You already have a pending request' });
   }
 
-  // Create the request
   await db.run(
     `INSERT INTO DesignerRequest (user_id, status, created_at) VALUES (?, 'pending', datetime('now'))`,
     [userId]
@@ -192,7 +183,6 @@ router.post('/request-designer', requireAuth, async (req, res) => {
   res.json({ message: 'Designer request submitted' });
 });
 
-// Get user's own designer request status
 router.get('/my-designer-request', requireAuth, async (req, res) => {
   const userId = req.session.userId!;
 
@@ -204,7 +194,6 @@ router.get('/my-designer-request', requireAuth, async (req, res) => {
   res.json(request || null);
 });
 
-// Get pending designer requests (for management)
 router.get('/designer-requests', requireAdmin, async (_req, res) => {
   const requests = await db.all(
     `SELECT dr.*, u.username, u.email
@@ -217,7 +206,6 @@ router.get('/designer-requests', requireAdmin, async (_req, res) => {
   res.json(requests);
 });
 
-// Approve designer request (for management)
 router.post('/designer-requests/:requestId/approve', requireAdmin, async (req, res) => {
   const requestId = req.params.requestId as string;
   const reviewerId = req.session.userId!;
@@ -235,19 +223,16 @@ router.post('/designer-requests/:requestId/approve', requireAdmin, async (req, r
     return res.status(400).json({ error: 'Request already processed' });
   }
 
-  // Get the requesting user's username for logging
   const targetUser = await db.get<{ username: string }>(
     `SELECT username FROM User WHERE user_id = ?`,
     [request.user_id]
   );
 
-  // Update request status
   await db.run(
     `UPDATE DesignerRequest SET status = 'approved', reviewed_by = ?, reviewed_at = datetime('now') WHERE request_id = ?`,
     [reviewerId, requestId]
   );
 
-  // Remove customer type and add designer type
   const customerType = await db.get<{ user_type_id: number }>(
     `SELECT user_type_id FROM RegularUserType WHERE LOWER(name) = 'customer'`
   );
@@ -274,7 +259,6 @@ router.post('/designer-requests/:requestId/approve', requireAdmin, async (req, r
   res.json({ message: 'Request approved' });
 });
 
-// Deny designer request (for management)
 router.post('/designer-requests/:requestId/deny', requireAdmin, async (req, res) => {
   const requestId = req.params.requestId as string;
   const reviewerId = req.session.userId!;
@@ -292,13 +276,11 @@ router.post('/designer-requests/:requestId/deny', requireAdmin, async (req, res)
     return res.status(400).json({ error: 'Request already processed' });
   }
 
-  // Get the requesting user's username for logging
   const targetUser = await db.get<{ username: string }>(
     `SELECT username FROM User WHERE user_id = ?`,
     [request.user_id]
   );
 
-  // Update request status
   await db.run(
     `UPDATE DesignerRequest SET status = 'denied', reviewed_by = ?, reviewed_at = datetime('now') WHERE request_id = ?`,
     [reviewerId, requestId]
@@ -309,7 +291,6 @@ router.post('/designer-requests/:requestId/deny', requireAdmin, async (req, res)
   res.json({ message: 'Request denied' });
 });
 
-// Get all users (admin only)
 router.get('/users', requireAdmin, async (_req, res) => {
   const users = await db.all<User & { role_name: string }>(
     `SELECT u.user_id, u.email, u.username, u.role_id, r.name as role_name, u.created_at
@@ -318,7 +299,6 @@ router.get('/users', requireAdmin, async (_req, res) => {
      ORDER BY u.created_at DESC`
   );
 
-  // Get user types for each user
   const usersWithTypes = await Promise.all(users.map(async (user) => {
     const types = await db.all<{ name: string }>(
       `SELECT rt.name FROM User_RegularUserType urt
@@ -335,7 +315,6 @@ router.get('/users', requireAdmin, async (_req, res) => {
   res.json(usersWithTypes);
 });
 
-// Update user role (admin only)
 router.put('/users/:userId/role', requireAdmin, async (req, res) => {
   const userId = req.params.userId as string;
   const { roleId } = req.body;
@@ -345,7 +324,6 @@ router.put('/users/:userId/role', requireAdmin, async (req, res) => {
     return res.status(400).json({ error: 'Invalid role ID' });
   }
 
-  // Get target user info for logging
   const targetUser = await db.get<{ username: string, role_id: number }>(
     `SELECT username, role_id FROM User WHERE user_id = ?`,
     [userId]
@@ -370,13 +348,11 @@ router.put('/users/:userId/role', requireAdmin, async (req, res) => {
     [roleId, userId]
   );
 
-  // Log with target username included in old_value as "username|old_role"
   await logAction(actorId, 'user_role', parseInt(userId), 'updated', `${targetUser.username}|${oldRoleName?.name}`, newRoleName?.name);
 
   res.json({ message: 'Role updated' });
 });
 
-// Add user type (admin only)
 router.post('/users/:userId/types', requireAdmin, async (req, res) => {
   const { userId } = req.params;
   const { userTypeId } = req.body;
@@ -385,7 +361,6 @@ router.post('/users/:userId/types', requireAdmin, async (req, res) => {
     return res.status(400).json({ error: 'Invalid user type ID' });
   }
 
-  // Check if already has this type
   const exists = await db.get(
     `SELECT * FROM User_RegularUserType WHERE user_id = ? AND user_type_id = ?`,
     [userId, userTypeId]
@@ -403,7 +378,6 @@ router.post('/users/:userId/types', requireAdmin, async (req, res) => {
   res.json({ message: 'User type added' });
 });
 
-// Remove user type (admin only)
 router.delete('/users/:userId/types/:typeId', requireAdmin, async (req, res) => {
   const { userId, typeId } = req.params;
 
@@ -415,17 +389,14 @@ router.delete('/users/:userId/types/:typeId', requireAdmin, async (req, res) => 
   res.json({ message: 'User type removed' });
 });
 
-// Delete user (admin only)
 router.delete('/users/:userId', requireAdmin, async (req, res) => {
   const userId = parseInt(req.params.userId as string);
   const actorId = req.session.userId!;
 
-  // Cannot delete yourself
   if (userId === actorId) {
     return res.status(400).json({ error: 'Cannot delete your own account' });
   }
 
-  // Check if user exists
   const user = await db.get<{ username: string }>(
     `SELECT username FROM User WHERE user_id = ?`,
     [userId]
@@ -436,7 +407,6 @@ router.delete('/users/:userId', requireAdmin, async (req, res) => {
   }
 
   try {
-    // Delete related records first (foreign key constraints)
     await db.run(`DELETE FROM User_RegularUserType WHERE user_id = ?`, [userId]);
     await db.run(`UPDATE DesignerRequest SET reviewed_by = NULL WHERE reviewed_by = ?`, [userId]);
     await db.run(`DELETE FROM DesignerRequest WHERE user_id = ?`, [userId]);
@@ -448,10 +418,8 @@ router.delete('/users/:userId', requireAdmin, async (req, res) => {
     await db.run(`DELETE FROM DesignTemplate WHERE designer_id = ?`, [userId]);
     await db.run(`UPDATE Category SET manager_id = ? WHERE manager_id = ?`, [actorId, userId]);
 
-    // Delete the user
     await db.run(`DELETE FROM User WHERE user_id = ?`, [userId]);
 
-    // Log the action (store username since user is now deleted)
     await logAction(actorId, 'user', userId, 'deleted', user.username, null);
 
     res.json({ message: 'User deleted successfully' });
@@ -461,7 +429,6 @@ router.delete('/users/:userId', requireAdmin, async (req, res) => {
   }
 });
 
-// Middleware for admin only (not management)
 const requireAdminOnly = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   if (!req.session.userId) {
     return res.status(401).json({ error: 'Not authenticated' });
@@ -480,7 +447,6 @@ const requireAdminOnly = async (req: express.Request, res: express.Response, nex
   next();
 };
 
-// Get all logs (admin only)
 router.get('/logs', requireAdminOnly, async (_req, res) => {
   const logs = await db.all(
     `SELECT l.*, u.username as actor_username, t.username as entity_username
@@ -491,22 +457,17 @@ router.get('/logs', requireAdminOnly, async (_req, res) => {
      LIMIT 100`
   );
 
-  // Parse old_value to extract target_username
   const parsedLogs = logs.map((log: any) => {
-    // New format: old_value contains "username|old_value"
     if ((log.entity_type === 'user_role' || log.entity_type === 'designer_request') && log.old_value && log.old_value.includes('|')) {
       const [targetUsername, oldVal] = log.old_value.split('|');
       return { ...log, target_username: targetUsername, old_value: oldVal };
     }
-    // Old format: use entity_username from join
     if ((log.entity_type === 'user_role' || log.entity_type === 'designer_request') && log.entity_username) {
       return { ...log, target_username: log.entity_username };
     }
-    // Deleted user: old_value contains the username
     if (log.entity_type === 'user' && log.action === 'deleted') {
       return { ...log, target_username: log.old_value, old_value: null };
     }
-    // Other entity types with a target user
     if (log.entity_username) {
       return { ...log, target_username: log.entity_username };
     }
@@ -533,7 +494,6 @@ router.get('/me', async (req, res) => {
     return res.status(200).json(null);
   }
 
-  // Get user types for regular users
   const userTypes = await db.all<{ name: string }>(
     `SELECT rt.name
      FROM User_RegularUserType urt
@@ -552,4 +512,3 @@ router.get('/me', async (req, res) => {
 });
 
 export default router;
-

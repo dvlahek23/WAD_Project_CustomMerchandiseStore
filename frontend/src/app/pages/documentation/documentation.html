@@ -1,4 +1,3 @@
-<!-- frontend/src/app/pages/documentation/documentation.html -->
 <div class="documentation-page">
   <header class="documentation-header">
     <h1>About & Documentation</h1>
@@ -13,6 +12,9 @@
   <div class="author" *ngFor="let a of authors">
     <img [src]="a.img" alt="{{ a.name }}" />
     <p class="author-name">{{ a.name }}</p>
+    <p class="author-email">
+      <a [href]="'mailto:' + a.email">{{ a.email }}</a>
+    </p>
   </div>
 </section>
 

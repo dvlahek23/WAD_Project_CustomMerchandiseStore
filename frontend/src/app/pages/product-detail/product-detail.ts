@@ -19,25 +19,21 @@ export class ProductDetail implements OnInit {
   loading = true;
   error = '';
 
-  // Customization options
   customText = '';
   quantity = 1;
   selectedColor = '#ffffff';
 
-  // Text box position and size (percentage)
   textBoxX = 50;
   textBoxY = 50;
   textBoxWidth = 40;
   textBoxHeight = 20;
 
-  // Image box position and size (percentage)
   uploadedImage: string | null = null;
   imageBoxX = 50;
   imageBoxY = 50;
   imageBoxWidth = 30;
   imageBoxHeight = 30;
 
-  // Dragging state
   isDragging = false;
   isResizing = false;
   isDraggingImage = false;
@@ -46,7 +42,6 @@ export class ProductDetail implements OnInit {
   private dragStartY = 0;
   private containerRect: DOMRect | null = null;
 
-  // Available colors for customization
   colors = [
     { name: 'White', value: '#ffffff' },
     { name: 'Black', value: '#000000' },
@@ -56,7 +51,6 @@ export class ProductDetail implements OnInit {
     { name: 'Gray', value: '#4a5568' },
   ];
 
-  // Category color mapping
   categoryColors: Record<string, string> = {
     'Clothing': '#5A3A31',
     'Accessories': '#84714F',
@@ -64,7 +58,6 @@ export class ProductDetail implements OnInit {
     'Stationery': '#4A7C59',
   };
 
-  // Reviews
   reviews: Review[] = [];
   loadingReviews = false;
   newReviewRating = 5;
@@ -123,7 +116,6 @@ export class ProductDetail implements OnInit {
   }
 
   get canAddReview(): boolean {
-    // User must be logged in and not a control user
     return this.userService.isLoggedIn &&
            this.userService.user?.role?.toLowerCase() !== 'control';
   }
@@ -134,9 +126,8 @@ export class ProductDetail implements OnInit {
     return sum / this.reviews.length;
   }
 
-  // Star distribution for pie chart
   get starDistribution(): { star: number; count: number; percentage: number; color: string }[] {
-    const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e']; // 1-5 stars colors
+    const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e'];
     const counts = [0, 0, 0, 0, 0];
 
     this.reviews.forEach(r => {
@@ -154,14 +145,13 @@ export class ProductDetail implements OnInit {
     }));
   }
 
-  // Generate SVG pie chart segments
   get pieChartSegments(): { path: string; color: string; star: number; percentage: number }[] {
     const segments: { path: string; color: string; star: number; percentage: number }[] = [];
     const distribution = this.starDistribution.filter(d => d.count > 0);
 
     if (distribution.length === 0) return segments;
 
-    let currentAngle = -90; // Start from top
+    let currentAngle = -90;
     const cx = 50, cy = 50, r = 40;
 
     distribution.forEach(d => {
@@ -169,20 +159,16 @@ export class ProductDetail implements OnInit {
       const startAngle = currentAngle;
       const endAngle = currentAngle + angle;
 
-      // Convert angles to radians
       const startRad = (startAngle * Math.PI) / 180;
       const endRad = (endAngle * Math.PI) / 180;
 
-      // Calculate arc points
       const x1 = cx + r * Math.cos(startRad);
       const y1 = cy + r * Math.sin(startRad);
       const x2 = cx + r * Math.cos(endRad);
       const y2 = cy + r * Math.sin(endRad);
 
-      // Large arc flag (1 if angle > 180)
       const largeArc = angle > 180 ? 1 : 0;
 
-      // Create SVG path
       const path = `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
 
       segments.push({
@@ -230,7 +216,6 @@ export class ProductDetail implements OnInit {
   }
 
   canDeleteReview(review: Review): boolean {
-    // User can delete if they own the review OR are admin
     return this.userService.isLoggedIn && (
       review.customer_id === this.userService.user?.user_id ||
       this.userService.isAdmin
@@ -278,7 +263,6 @@ export class ProductDetail implements OnInit {
       return;
     }
 
-    // For now, just place order directly (cart not implemented)
     this.orderNow();
   }
 
@@ -317,7 +301,6 @@ export class ProductDetail implements OnInit {
     });
   }
 
-  // Drag functionality
   onDragStart(event: MouseEvent) {
     this.isDragging = true;
     this.isResizing = false;
@@ -389,7 +372,6 @@ export class ProductDetail implements OnInit {
     this.containerRect = null;
   }
 
-  // Image upload
   onImageUpload(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
@@ -405,7 +387,6 @@ export class ProductDetail implements OnInit {
 
   removeUploadedImage() {
     this.uploadedImage = null;
-    // Reset file input so the same file can be selected again
     const fileInput = document.getElementById('imageUpload') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';

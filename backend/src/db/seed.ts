@@ -1,10 +1,8 @@
 import { db } from './initDb';
 
 export async function seedDatabase() {
-  // Wait for database to be ready
   await db.ready();
 
-  // Seed Roles
   const roles = [
     { role_id: 4, name: 'administrator', description: 'Full system access' },
     { role_id: 3, name: 'management', description: 'Store management access' },
@@ -23,7 +21,6 @@ export async function seedDatabase() {
     }
   }
 
-  // Seed RegularUserTypes
   const userTypes = [
     { user_type_id: 1, name: 'customer' },
     { user_type_id: 2, name: 'designer' },
@@ -43,5 +40,4 @@ export async function seedDatabase() {
   console.log('Database seeding complete.');
 }
 
-// Run if executed directly
 seedDatabase().catch(console.error);

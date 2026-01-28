@@ -18,11 +18,9 @@ export class ManageProducts implements OnInit {
   loading = true;
   error = '';
 
-  // Modal state
   showModal = false;
   editingProduct: Product | null = null;
 
-  // Form fields
   formName = '';
   formDescription = '';
   formBasePrice = 0;
@@ -30,7 +28,6 @@ export class ManageProducts implements OnInit {
   formCategoryId = 0;
   formPictureUrl = '';
 
-  // Delete confirmation
   productToDelete: Product | null = null;
 
   constructor(
@@ -107,7 +104,6 @@ export class ManageProducts implements OnInit {
     };
 
     if (this.editingProduct) {
-      // Update existing
       this.productsService.updateProduct(this.editingProduct.product_id, productData).subscribe({
         next: () => {
           this.closeModal();
@@ -118,7 +114,6 @@ export class ManageProducts implements OnInit {
         }
       });
     } else {
-      // Create new
       this.productsService.createProduct(productData).subscribe({
         next: () => {
           this.closeModal();

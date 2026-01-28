@@ -1,4 +1,3 @@
-// frontend/src/app/pages/documentation/documentation.ts
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -32,6 +31,16 @@ export class Documentation {
       description: 'Comprehensive list of REST API endpoints for the Custom Merchandise Store backend.',
       file: 'rest-endpoints.pdf',
     },
+        {
+      title: 'Architecture Overview',
+      description: 'High-level architecture and design principles of the Custom Merchandise Store application.',
+      file: 'architecture.png',
+    },
+          {
+      title: 'Project evaulation final form',
+      description: 'Final project evaluation form for the Custom Merchandise Store application.',
+      file: 'Project_Evaluation_Form_Final.pdf',
+    },
   ];
 
   getUrl(doc: DocItem): string {
@@ -41,11 +50,13 @@ export class Documentation {
   authors = [
   {
     name: 'Domagoj',
-    img: '/domagoj.jpg'
+    img: '/domagoj.jpg',
+    email: 'dvlahek23@student.foi.hr'
   },
   {
     name: 'Dmytro',
-    img: '/dmytro.jpg'
+    img: '/dmytro.jpg',
+    email: 'konskiidima@gmail.com'
   }
 ];
 }

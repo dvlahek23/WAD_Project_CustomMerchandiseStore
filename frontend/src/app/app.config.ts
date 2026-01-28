@@ -7,7 +7,6 @@ import { provideClientHydration, withEventReplay } from '@angular/platform-brows
 import { UserService } from './core/user';
 import { catchError, of } from 'rxjs';
 
-// Interceptor to send credentials (cookies) with all requests
 const credentialsInterceptor: HttpInterceptorFn = (req, next) => {
   const clonedReq = req.clone({ withCredentials: true });
   return next(clonedReq);
@@ -18,7 +17,6 @@ function initializeUser() {
   const platformId = inject(PLATFORM_ID);
 
   return () => {
-    // Only load user on browser, not during SSR
     if (isPlatformBrowser(platformId)) {
       return userService.loadUser().pipe(catchError(() => of(null)));
     }

@@ -39,7 +39,6 @@ export class AuthService {
     return this.http.get('/api/auth/my-designer-request');
   }
 
-  // Management endpoints
   getDesignerRequests(): Observable<any[]> {
     return this.http.get<any[]>('/api/auth/designer-requests');
   }
@@ -52,12 +51,10 @@ export class AuthService {
     return this.http.post<{ message: string }>(`/api/auth/designer-requests/${requestId}/deny`, {});
   }
 
-  // Admin endpoints
   getLogs(): Observable<any[]> {
     return this.http.get<any[]>('/api/auth/logs');
   }
 
-  // Admin endpoints
   getUsers(): Observable<any[]> {
     return this.http.get<any[]>('/api/auth/users');
   }

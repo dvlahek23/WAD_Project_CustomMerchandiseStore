@@ -17,7 +17,6 @@ export class DesignerOrders implements OnInit {
   loading = true;
   error = '';
 
-  // Rejection modal
   showRejectModal = false;
   selectedOrder: Order | null = null;
   rejectionReason = '';

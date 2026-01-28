@@ -4,7 +4,6 @@ import { db } from '../db/initDb';
 
 const router = Router();
 
-// Middleware to check if user is admin or management
 const requireManagement = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   if (!req.session.userId) {
     return res.status(401).json({ error: 'Not authenticated' });
@@ -24,7 +23,6 @@ const requireManagement = async (req: express.Request, res: express.Response, ne
   next();
 };
 
-// Get all products with category info
 router.get('/', async (req, res) => {
   try {
     const { category, type, search } = req.query;
@@ -62,7 +60,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get all categories
 router.get('/categories', async (_req, res) => {
   try {
     const rows = await db.all('SELECT * FROM Category ORDER BY name');
@@ -73,7 +70,6 @@ router.get('/categories', async (_req, res) => {
   }
 });
 
-// Get all product types
 router.get('/types', async (_req, res) => {
   try {
     const rows = await db.all('SELECT DISTINCT product_type FROM Product ORDER BY product_type');
@@ -84,7 +80,6 @@ router.get('/types', async (_req, res) => {
   }
 });
 
-// Get single product by ID
 router.get('/:id', async (req, res) => {
   try {
     const row = await db.get(`
@@ -104,7 +99,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// CREATE new product  (POST /api/products)
 router.post('/', requireManagement, async (req, res) => {
   const { name, description, base_price, product_type, category_id, picture_url } = req.body;
 
@@ -134,7 +128,6 @@ router.post('/', requireManagement, async (req, res) => {
   }
 });
 
-// UPDATE product by ID (PUT /api/products/:id)
 router.put('/:id', requireManagement, async (req, res) => {
   const { name, description, base_price, product_type, category_id, picture_url } = req.body;
   const { id } = req.params;
@@ -176,9 +169,6 @@ router.put('/:id', requireManagement, async (req, res) => {
   }
 });
 
-
-
-// DELETE product by ID (DELETE /api/products/:id)
 router.delete('/:id', requireManagement, async (req, res) => {
   const { id } = req.params;
 
@@ -195,6 +185,5 @@ router.delete('/:id', requireManagement, async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
 
 export default router;

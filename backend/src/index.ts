@@ -1,12 +1,12 @@
 import express from 'express';
 import session from 'express-session';
 import cors from 'cors';
+import path from 'path';
 import { db } from './db/initDb';
 import productsRouter from './routes/products';
 import authRouter from './routes/auth';
 import ordersRouter from './routes/orders';
 import reviewsRouter from './routes/reviews';
-
 
 const app = express();
 
@@ -28,8 +28,6 @@ app.use(session({
   },
 }));
 
-
-
 app.get('/api/hello', (_req, res) => {
   res.json({ message: 'Backend radi!' });
 });
@@ -37,7 +35,13 @@ app.get('/api/hello', (_req, res) => {
 app.use('/api/products', productsRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/orders', ordersRouter);
-app.use('/api/reviews', reviewsRouter); 
+app.use('/api/reviews', reviewsRouter);
 
+const frontendPath = path.join(__dirname, '../../frontend/dist/frontend/browser');
+app.use(express.static(frontendPath));
+
+app.get('{*path}', (_req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 export default app;

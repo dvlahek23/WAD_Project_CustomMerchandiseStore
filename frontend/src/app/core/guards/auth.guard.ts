@@ -3,7 +3,6 @@ import { CanActivateFn, Router } from '@angular/router';
 import { UserService } from '../user';
 import { map, filter, take } from 'rxjs/operators';
 
-// Basic auth guard - requires user to be logged in
 export const authGuard: CanActivateFn = () => {
   const userService = inject(UserService);
   const router = inject(Router);
@@ -21,7 +20,6 @@ export const authGuard: CanActivateFn = () => {
   );
 };
 
-// Guest guard - only allows non-authenticated users (for login/register pages)
 export const guestGuard: CanActivateFn = () => {
   const userService = inject(UserService);
   const router = inject(Router);
@@ -39,7 +37,6 @@ export const guestGuard: CanActivateFn = () => {
   );
 };
 
-// Admin guard - requires administrator role
 export const adminGuard: CanActivateFn = () => {
   const userService = inject(UserService);
   const router = inject(Router);
@@ -57,7 +54,6 @@ export const adminGuard: CanActivateFn = () => {
   );
 };
 
-// Management guard - requires management or administrator role
 export const managementGuard: CanActivateFn = () => {
   const userService = inject(UserService);
   const router = inject(Router);
@@ -75,7 +71,6 @@ export const managementGuard: CanActivateFn = () => {
   );
 };
 
-// Designer guard - requires designer user type
 export const designerGuard: CanActivateFn = () => {
   const userService = inject(UserService);
   const router = inject(Router);
@@ -93,7 +88,6 @@ export const designerGuard: CanActivateFn = () => {
   );
 };
 
-// Customer guard - requires customer user type
 export const customerGuard: CanActivateFn = () => {
   const userService = inject(UserService);
   const router = inject(Router);

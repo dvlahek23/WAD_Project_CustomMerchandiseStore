@@ -3,7 +3,6 @@ import { db } from '../db/initDb';
 
 const router = express.Router();
 
-// Middleware – treba login za pisanje/izmjenu/brisanje reviewa
 const requireAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   if (!req.session.userId) {
     return res.status(401).json({ error: 'Not authenticated' });
@@ -11,7 +10,6 @@ const requireAuth = (req: express.Request, res: express.Response, next: express.
   next();
 };
 
-// GET /api/reviews?productId=...
 router.get('/', async (req, res) => {
   const { productId } = req.query;
 
@@ -34,13 +32,11 @@ router.get('/', async (req, res) => {
   res.json(reviews);
 });
 
-// POST /api/reviews
 router.post('/', requireAuth, async (req, res) => {
   const customerId = req.session.userId!;
   const { product_id, rating, comment } = req.body;
 
   try {
-    // Check if user is control role (not allowed to post reviews)
     const user = await db.get<{ role_name: string }>(
       `SELECT r.name as role_name FROM User u
        JOIN Role r ON u.role_id = r.role_id
@@ -69,7 +65,6 @@ router.post('/', requireAuth, async (req, res) => {
   }
 });
 
-// PUT /api/reviews/:id
 router.put('/:id', requireAuth, async (req, res) => {
   const customerId = req.session.userId!;
   const { id } = req.params;
@@ -95,7 +90,6 @@ router.put('/:id', requireAuth, async (req, res) => {
   res.json({ message: 'Review updated' });
 });
 
-// Helper to check if user is admin
 async function isAdmin(userId: number): Promise<boolean> {
   const user = await db.get<{ role_name: string }>(
     `SELECT r.name as role_name FROM User u
@@ -106,7 +100,6 @@ async function isAdmin(userId: number): Promise<boolean> {
   return user?.role_name?.toLowerCase() === 'administrator';
 }
 
-// DELETE /api/reviews/:id
 router.delete('/:id', requireAuth, async (req, res) => {
   const userId = req.session.userId!;
   const { id } = req.params;
@@ -120,7 +113,6 @@ router.delete('/:id', requireAuth, async (req, res) => {
     return res.status(404).json({ error: 'Review not found' });
   }
 
-  // Allow deletion if user is the owner OR is an admin
   const userIsAdmin = await isAdmin(userId);
   if (existing.customer_id !== userId && !userIsAdmin) {
     return res.status(403).json({ error: 'You can only delete your own reviews' });

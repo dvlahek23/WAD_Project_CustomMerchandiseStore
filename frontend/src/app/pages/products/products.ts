@@ -23,8 +23,6 @@ export class Products implements OnInit {
 
   loading = true;
 
-
-  // Color mapping for categories
   categoryColors: Record<string, string> = {
     'Clothing': '#5A3A31',
     'Accessories': '#84714F',
@@ -44,7 +42,6 @@ export class Products implements OnInit {
   loadData() {
     this.loading = true;
 
-    // Load categories and types first
     this.productsService.getCategories().subscribe({
       next: (categories) => {
         this.categories = categories;
@@ -59,7 +56,6 @@ export class Products implements OnInit {
       }
     });
 
-    // Load products
     this.productsService.getProducts().subscribe({
       next: (products) => {
         this.products = products;

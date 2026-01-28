@@ -59,47 +59,38 @@ export interface CreateOrderRequest {
 export class OrdersService {
   constructor(private http: HttpClient) {}
 
-  // Create a new order
   createOrder(order: CreateOrderRequest): Observable<{ message: string; orderId: number }> {
     return this.http.post<{ message: string; orderId: number }>('/api/orders', order);
   }
 
-  // Get customer's own orders
   getMyOrders(): Observable<Order[]> {
     return this.http.get<Order[]>('/api/orders/my-orders');
   }
 
-  // Get orders pending designer review
   getPendingDesignOrders(): Observable<Order[]> {
     return this.http.get<Order[]>('/api/orders/pending-design');
   }
 
-  // Designer approves design
   approveDesign(orderId: number): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`/api/orders/${orderId}/approve-design`, {});
   }
 
-  // Designer rejects design
   rejectDesign(orderId: number, reason: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`/api/orders/${orderId}/reject-design`, { reason });
   }
 
-  // Customer pays for order
   payOrder(orderId: number, paymentMethod: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`/api/orders/${orderId}/pay`, { paymentMethod });
   }
 
-  // Get orders pending shipment (for management)
   getPendingShipmentOrders(): Observable<Order[]> {
     return this.http.get<Order[]>('/api/orders/pending-shipment');
   }
 
-  // Management ships order
   shipOrder(orderId: number): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`/api/orders/${orderId}/ship`, {});
   }
 
-  // Get all orders (for management)
   getAllOrders(): Observable<Order[]> {
     return this.http.get<Order[]>('/api/orders/all');
   }

@@ -22,7 +22,6 @@ export class UserService {
   loaded$: Observable<boolean>;
 
   constructor(private auth: AuthService) {
-    // On server, mark as loaded immediately to prevent guards from waiting
     const initialLoaded = !isPlatformBrowser(this.platformId);
     this.loadedSubject = new BehaviorSubject<boolean>(initialLoaded);
     this.loaded$ = this.loadedSubject.asObservable();

@@ -3,15 +3,6 @@ import { db } from '../db/initDb';
 
 const router = express.Router();
 
-// Order statuses:
-// - pending_design: Waiting for designer review
-// - design_approved: Designer approved, waiting for payment
-// - design_rejected: Designer rejected, customer can revise
-// - paid: Payment received, waiting for shipment
-// - shipped: Order shipped
-// - completed: Order delivered
-
-// Middleware to check if user is logged in
 const requireAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   if (!req.session.userId) {
     return res.status(401).json({ error: 'Not authenticated' });
@@ -19,7 +10,6 @@ const requireAuth = (req: express.Request, res: express.Response, next: express.
   next();
 };
 
-// Helper to check if user is a designer
 async function isDesigner(userId: number): Promise<boolean> {
   const designerType = await db.get<{ user_type_id: number }>(
     `SELECT user_type_id FROM RegularUserType WHERE LOWER(name) = 'designer'`
@@ -33,7 +23,6 @@ async function isDesigner(userId: number): Promise<boolean> {
   return !!hasType;
 }
 
-// Helper to check if user is management
 async function isManagement(userId: number): Promise<boolean> {
   const user = await db.get<{ role_name: string }>(
     `SELECT r.name as role_name FROM User u
@@ -45,7 +34,6 @@ async function isManagement(userId: number): Promise<boolean> {
   return roleName === 'management' || roleName === 'administrator';
 }
 
-// Place a new order
 router.post('/', requireAuth, async (req, res) => {
   const customerId = req.session.userId!;
   const { productId, quantity, customText, textColor, textPositionX, textPositionY, textWidth, textHeight,
@@ -55,7 +43,6 @@ router.post('/', requireAuth, async (req, res) => {
     return res.status(400).json({ error: 'Invalid order data' });
   }
 
-  // Get product price
   const product = await db.get<{ base_price: number }>(
     `SELECT base_price FROM Product WHERE product_id = ?`,
     [productId]
@@ -68,7 +55,6 @@ router.post('/', requireAuth, async (req, res) => {
   const totalAmount = product.base_price * quantity;
 
   try {
-    // Create order
     const orderResult = await db.run(
       `INSERT INTO "Order" (customer_id, order_date, total_amount, status, payment_method)
        VALUES (?, datetime('now'), ?, 'pending_design', 'pending')`,
@@ -77,7 +63,6 @@ router.post('/', requireAuth, async (req, res) => {
 
     const orderId = orderResult.lastID;
 
-    // Create order item with customization
     await db.run(
       `INSERT INTO OrderItem (order_id, product_id, quantity, unit_price,
         custom_text, text_color, text_position_x, text_position_y, text_width, text_height,
@@ -95,9 +80,6 @@ router.post('/', requireAuth, async (req, res) => {
   }
 });
 
-
-
-// GET /api/orders - all orders for logged-in user (alias to /my-orders)
 router.get('/', requireAuth, async (req, res) => {
   const customerId = req.session.userId!;
 
@@ -114,9 +96,6 @@ router.get('/', requireAuth, async (req, res) => {
   res.json(orders);
 });
 
-
-
-// Get customer's own orders
 router.get('/my-orders', requireAuth, async (req, res) => {
   const customerId = req.session.userId!;
 
@@ -133,11 +112,9 @@ router.get('/my-orders', requireAuth, async (req, res) => {
   res.json(orders);
 });
 
-// Get orders pending designer review
 router.get('/pending-design', requireAuth, async (req, res) => {
   const userId = req.session.userId!;
 
-  // Check if user is a designer
   if (!(await isDesigner(userId))) {
     return res.status(403).json({ error: 'Designer access required' });
   }
@@ -156,12 +133,12 @@ router.get('/pending-design', requireAuth, async (req, res) => {
   res.json(orders);
 });
 
-// GET /api/orders/:orderId/status - returns order status
 router.get('/:orderId/status', requireAuth, async (req, res) => {
   const { orderId } = req.params;
+  const userId = req.session.userId!;
 
-  const order = await db.get<{ status: string }>(
-    `SELECT status FROM "Order" WHERE order_id = ?`,
+  const order = await db.get<{ status: string; customer_id: number }>(
+    `SELECT status, customer_id FROM "Order" WHERE order_id = ?`,
     [orderId]
   );
 
@@ -169,13 +146,27 @@ router.get('/:orderId/status', requireAuth, async (req, res) => {
     return res.status(404).json({ error: 'Order not found' });
   }
 
+  const isOwner = order.customer_id === userId;
+  const userIsManagement = await isManagement(userId);
+  const userIsDesigner = await isDesigner(userId);
+
+  const designerCanAccess = userIsDesigner && order.status === 'pending_design';
+
+  if (!isOwner && !userIsManagement && !designerCanAccess) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
   res.json({ status: order.status });
 });
 
-// PUT /api/orders/:orderId/status - updates order status (simplified)
 router.put('/:orderId/status', requireAuth, async (req, res) => {
   const { orderId } = req.params;
   const { status } = req.body;
+  const userId = req.session.userId!;
+
+  if (!(await isManagement(userId))) {
+    return res.status(403).json({ error: 'Management access required' });
+  }
 
   const allowedStatuses = [
     'pending_design',
@@ -207,10 +198,28 @@ router.put('/:orderId/status', requireAuth, async (req, res) => {
   res.json({ message: 'Status updated', status });
 });
 
-
-// GET /api/orders/:orderId/items - all items in an order
 router.get('/:orderId/items', requireAuth, async (req, res) => {
   const { orderId } = req.params;
+  const userId = req.session.userId!;
+
+  const order = await db.get<{ customer_id: number; status: string }>(
+    `SELECT customer_id, status FROM "Order" WHERE order_id = ?`,
+    [orderId]
+  );
+
+  if (!order) {
+    return res.status(404).json({ error: 'Order not found' });
+  }
+
+  const isOwner = order.customer_id === userId;
+  const userIsManagement = await isManagement(userId);
+  const userIsDesigner = await isDesigner(userId);
+
+  const designerCanAccess = userIsDesigner && order.status === 'pending_design';
+
+  if (!isOwner && !userIsManagement && !designerCanAccess) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
 
   const items = await db.all(
     `SELECT oi.*, p.name as product_name, p.picture_url
@@ -223,8 +232,6 @@ router.get('/:orderId/items', requireAuth, async (req, res) => {
   res.json(items);
 });
 
-
-// Designer approves design
 router.post('/:orderId/approve-design', requireAuth, async (req, res) => {
   const userId = req.session.userId!;
   const orderId = req.params.orderId;
@@ -255,7 +262,6 @@ router.post('/:orderId/approve-design', requireAuth, async (req, res) => {
   res.json({ message: 'Design approved' });
 });
 
-// Designer rejects design
 router.post('/:orderId/reject-design', requireAuth, async (req, res) => {
   const userId = req.session.userId!;
   const orderId = req.params.orderId;
@@ -287,7 +293,6 @@ router.post('/:orderId/reject-design', requireAuth, async (req, res) => {
   res.json({ message: 'Design rejected' });
 });
 
-// Customer pays for order
 router.post('/:orderId/pay', requireAuth, async (req, res) => {
   const customerId = req.session.userId!;
   const orderId = req.params.orderId;
@@ -319,7 +324,6 @@ router.post('/:orderId/pay', requireAuth, async (req, res) => {
   res.json({ message: 'Payment successful' });
 });
 
-// Get paid orders for management to ship
 router.get('/pending-shipment', requireAuth, async (req, res) => {
   const userId = req.session.userId!;
 
@@ -341,7 +345,6 @@ router.get('/pending-shipment', requireAuth, async (req, res) => {
   res.json(orders);
 });
 
-// Management ships order
 router.post('/:orderId/ship', requireAuth, async (req, res) => {
   const userId = req.session.userId!;
   const orderId = req.params.orderId;
@@ -372,7 +375,6 @@ router.post('/:orderId/ship', requireAuth, async (req, res) => {
   res.json({ message: 'Order shipped' });
 });
 
-// Get all orders (for management)
 router.get('/all', requireAuth, async (req, res) => {
   const userId = req.session.userId!;
 

@@ -18,7 +18,6 @@ const rawDb = new sqlite3.Database(dbPath, (err) => {
   console.log('SQLite baza otvorena na:', dbPath);
 });
 
-// Migration helper - add column if it doesn't exist
 function addColumnIfNotExists(table: string, column: string, type: string): Promise<void> {
   return new Promise((resolve) => {
     rawDb.all(`PRAGMA table_info("${table}")`, (err, rows: any[]) => {
@@ -48,14 +47,12 @@ dbReady = new Promise((resolve, reject) => {
       } else {
         console.log('Schema (tablice iz schema.sql) inicijalizirane.');
 
-        // Run migrations for Order table
         await addColumnIfNotExists('Order', 'designer_id', 'INTEGER');
         await addColumnIfNotExists('Order', 'designer_reviewed_at', 'DATETIME');
         await addColumnIfNotExists('Order', 'paid_at', 'DATETIME');
         await addColumnIfNotExists('Order', 'shipped_at', 'DATETIME');
         await addColumnIfNotExists('Order', 'rejection_reason', 'VARCHAR(255)');
 
-        // Run migrations for OrderItem table
         await addColumnIfNotExists('OrderItem', 'custom_text', 'VARCHAR(100)');
         await addColumnIfNotExists('OrderItem', 'text_color', 'VARCHAR(20)');
         await addColumnIfNotExists('OrderItem', 'text_position_x', 'DECIMAL');
