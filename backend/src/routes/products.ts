@@ -1,7 +1,28 @@
 import { Router } from 'express';
+import express from 'express';
 import { db } from '../db/initDb';
 
 const router = Router();
+
+// Middleware to check if user is admin or management
+const requireManagement = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  const user = await db.get<{ role_name: string }>(
+    `SELECT r.name as role_name FROM User u
+     JOIN Role r ON u.role_id = r.role_id
+     WHERE u.user_id = ?`,
+    [req.session.userId]
+  );
+
+  const roleName = user?.role_name?.toLowerCase();
+  if (!user || (roleName !== 'administrator' && roleName !== 'management')) {
+    return res.status(403).json({ error: 'Admin or management access required' });
+  }
+  next();
+};
 
 // Get all products with category info
 router.get('/', async (req, res) => {
@@ -84,7 +105,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // CREATE new product  (POST /api/products)
-router.post('/', async (req, res) => {
+router.post('/', requireManagement, async (req, res) => {
   const { name, description, base_price, product_type, category_id, picture_url } = req.body;
 
   if (!name || !base_price || !product_type || !category_id) {
@@ -114,7 +135,7 @@ router.post('/', async (req, res) => {
 });
 
 // UPDATE product by ID (PUT /api/products/:id)
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireManagement, async (req, res) => {
   const { name, description, base_price, product_type, category_id, picture_url } = req.body;
   const { id } = req.params;
 
@@ -158,7 +179,7 @@ router.put('/:id', async (req, res) => {
 
 
 // DELETE product by ID (DELETE /api/products/:id)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireManagement, async (req, res) => {
   const { id } = req.params;
 
   try {

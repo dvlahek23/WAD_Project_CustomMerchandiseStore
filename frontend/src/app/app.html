@@ -7,25 +7,41 @@
       </a>
 
       <nav class="cms-nav-links">
-        <!-- Always visible -->
-        <a routerLink="/products" class="cms-nav-link cms-nav-link--primary">Products</a>
-        <a routerLink="/documentation" class="cms-nav-link cms-nav-link--primary">About us & Documentation</a>
+        <!-- Main navigation -->
+        <a routerLink="/products" class="cms-nav-link">Products</a>
+        <a routerLink="/documentation" class="cms-nav-link">About</a>
 
-        <!-- Guest links -->
-        <ng-container *ngIf="!userService.isLoggedIn">
-          <a routerLink="/login" class="cms-nav-link cms-nav-link--guest">Login</a>
-          <a routerLink="/register" class="cms-nav-link cms-nav-link--guest">Register</a>
-        </ng-container>
-
-        <!-- Logged in links -->
+        <!-- Role-specific links (logged in) -->
         <ng-container *ngIf="userService.isLoggedIn">
-          <a routerLink="/profile" class="cms-nav-link cms-nav-link--profile">Profile</a>
-          <button (click)="logout()" class="cms-nav-link cms-nav-link--primary">Logout</button>
-          <div class="cms-user-info">
-            <span class="cms-username">{{ userService.user?.username }}</span>
-            <span class="cms-role">{{ roleDisplay }}</span>
-          </div>
+          <span class="cms-nav-divider"></span>
+          <a routerLink="/my-orders" class="cms-nav-link"
+             *ngIf="userService.isCustomer || userService.isDesigner || userService.isAdmin || userService.isManagement">My Orders</a>
+          <a routerLink="/designer-orders" class="cms-nav-link"
+             *ngIf="userService.isDesigner || userService.isAdmin || userService.isManagement">Design Review</a>
+          <a routerLink="/manage-orders" class="cms-nav-link"
+             *ngIf="userService.isAdmin || userService.isManagement">Manage Orders</a>
+          <a routerLink="/manage-products" class="cms-nav-link"
+             *ngIf="userService.isAdmin || userService.isManagement">Manage Products</a>
         </ng-container>
+
+        <!-- User section -->
+        <div class="cms-nav-user">
+          <!-- Guest links -->
+          <ng-container *ngIf="!userService.isLoggedIn">
+            <a routerLink="/login" class="cms-nav-link cms-nav-link--outline">Login</a>
+            <a routerLink="/register" class="cms-nav-link cms-nav-link--filled">Register</a>
+          </ng-container>
+
+          <!-- Logged in -->
+          <ng-container *ngIf="userService.isLoggedIn">
+            <div class="cms-user-info">
+              <span class="cms-username">{{ userService.user?.username }}</span>
+              <span class="cms-role">{{ roleDisplay }}</span>
+            </div>
+            <a routerLink="/profile" class="cms-nav-link cms-nav-link--outline">Profile</a>
+            <button (click)="logout()" class="cms-nav-link cms-nav-link--filled">Logout</button>
+          </ng-container>
+        </div>
       </nav>
     </div>
   </header>

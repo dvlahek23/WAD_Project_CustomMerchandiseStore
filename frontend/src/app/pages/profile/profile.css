@@ -614,3 +614,24 @@
   background: #fee2e2;
   color: #991b1b;
 }
+
+/* Export PDF Button */
+.btn-export-pdf {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: var(--chocolate-plum, #5a3a31);
+  color: white;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.btn-export-pdf:hover {
+  background: #4a2d24;
+  transform: translateY(-1px);
+}

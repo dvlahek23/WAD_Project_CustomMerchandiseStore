@@ -70,8 +70,8 @@ router.post('/', requireAuth, async (req, res) => {
   try {
     // Create order
     const orderResult = await db.run(
-      `INSERT INTO "Order" (customer_id, order_date, total_amount, status)
-       VALUES (?, datetime('now'), ?, 'pending_design')`,
+      `INSERT INTO "Order" (customer_id, order_date, total_amount, status, payment_method)
+       VALUES (?, datetime('now'), ?, 'pending_design', 'pending')`,
       [customerId, totalAmount]
     );
 
@@ -91,7 +91,7 @@ router.post('/', requireAuth, async (req, res) => {
     res.json({ message: 'Order placed successfully', orderId });
   } catch (err: any) {
     console.error('Order creation error:', err);
-    res.status(500).json({ error: 'Failed to create order' });
+    res.status(500).json({ error: `Failed to create order: ${err.message}` });
   }
 });
 

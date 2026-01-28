@@ -1,11 +1,17 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, APP_INITIALIZER, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors, HttpInterceptorFn } from '@angular/common/http';
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { UserService } from './core/user';
 import { catchError, of } from 'rxjs';
+
+// Interceptor to send credentials (cookies) with all requests
+const credentialsInterceptor: HttpInterceptorFn = (req, next) => {
+  const clonedReq = req.clone({ withCredentials: true });
+  return next(clonedReq);
+};
 
 function initializeUser() {
   const userService = inject(UserService);
@@ -25,7 +31,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
-    provideHttpClient(withFetch()),
+    provideHttpClient(withFetch(), withInterceptors([credentialsInterceptor])),
     {
       provide: APP_INITIALIZER,
       useFactory: initializeUser,

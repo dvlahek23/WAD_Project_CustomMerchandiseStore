@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { UserService } from '../../core/user';
 import { AuthService } from '../../core/auth';
 import { filter, take } from 'rxjs/operators';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-profile',
@@ -412,5 +414,49 @@ export class ProfileComponent implements OnInit {
         this.router.navigateByUrl('/');
       }
     });
+  }
+
+  exportLogsToPdf() {
+    const doc = new jsPDF();
+
+    // Title
+    doc.setFontSize(18);
+    doc.text('Activity Log Report', 14, 22);
+
+    // Date
+    doc.setFontSize(10);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 30);
+
+    // Prepare table data
+    const tableData = this.logs.map(log => {
+      const date = new Date(log.created_at).toLocaleString();
+      const action = log.action || '-';
+      let details = '';
+
+      if (log.target_username && (log.old_value || log.new_value)) {
+        details = `${log.target_username}: ${log.old_value || '-'} → ${log.new_value || '-'}`;
+      } else if (log.target_username) {
+        details = log.target_username;
+      } else if (log.old_value || log.new_value) {
+        details = `${log.old_value || '-'} → ${log.new_value || '-'}`;
+      } else {
+        details = log.entity_type || '-';
+      }
+
+      return [date, log.actor_username, action, details];
+    });
+
+    // Create table
+    autoTable(doc, {
+      startY: 38,
+      head: [['Date', 'User', 'Action', 'Details']],
+      body: tableData,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [90, 58, 49] },
+      alternateRowStyles: { fillColor: [248, 248, 248] },
+    });
+
+    // Save PDF
+    doc.save('activity-log.pdf');
   }
 }

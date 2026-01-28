@@ -1,0 +1,103 @@
+<div class="designer-orders-page">
+  <h1>Design Review</h1>
+  <p class="subtitle">Review and approve customer designs</p>
+
+  <div class="loading" *ngIf="loading">
+    <p>Loading orders...</p>
+  </div>
+
+  <div class="error" *ngIf="error">
+    <p>{{ error }}</p>
+  </div>
+
+  <div class="no-orders" *ngIf="!loading && !error && orders.length === 0">
+    <p>No orders pending design review.</p>
+  </div>
+
+  <div class="orders-list" *ngIf="!loading && orders.length > 0">
+    <div class="order-card" *ngFor="let order of orders">
+      <div class="order-header">
+        <div class="order-info">
+          <span class="order-id">Order #{{ order.order_id }}</span>
+          <span class="customer-name">by {{ order.customer_name }}</span>
+        </div>
+        <span class="order-date">{{ formatDate(order.order_date) }}</span>
+      </div>
+
+      <div class="order-content">
+        <div class="product-preview">
+          <img [src]="order.picture_url" [alt]="order.product_name" class="product-image">
+          <div
+            class="preview-text"
+            *ngIf="order.custom_text"
+            [style.left.%]="order.text_position_x"
+            [style.top.%]="order.text_position_y"
+            [style.width.%]="order.text_width"
+            [style.height.%]="order.text_height"
+            [style.color]="order.text_color"
+          >{{ order.custom_text }}</div>
+          <img
+            *ngIf="order.custom_image"
+            [src]="order.custom_image"
+            class="preview-custom-image"
+            [style.left.%]="order.image_position_x"
+            [style.top.%]="order.image_position_y"
+            [style.width.%]="order.image_width"
+            [style.height.%]="order.image_height"
+          >
+        </div>
+
+        <div class="order-details">
+          <h3>{{ order.product_name }}</h3>
+          <p class="quantity">Quantity: {{ order.quantity }}</p>
+
+          <div class="customization-details">
+            <h4>Customization</h4>
+            <p *ngIf="order.custom_text">
+              <strong>Text:</strong> "{{ order.custom_text }}"
+            </p>
+            <p *ngIf="order.text_color">
+              <strong>Text Color:</strong>
+              <span class="color-preview" [style.background-color]="order.text_color"></span>
+              {{ order.text_color }}
+            </p>
+            <p *ngIf="order.custom_image">
+              <strong>Custom Image:</strong> Uploaded
+            </p>
+            <p *ngIf="!order.custom_text && !order.custom_image">
+              No customizations
+            </p>
+          </div>
+
+          <p class="total">Total: {{ order.total_amount | number:'1.2-2' }}</p>
+        </div>
+      </div>
+
+      <div class="order-actions">
+        <button class="btn btn-reject" (click)="openRejectModal(order)">
+          Reject
+        </button>
+        <button class="btn btn-approve" (click)="approveOrder(order)">
+          Approve Design
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rejection Modal -->
+<div class="modal-overlay" *ngIf="showRejectModal" (click)="closeRejectModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h2>Reject Design</h2>
+    <p>Please provide a reason for rejection:</p>
+    <textarea
+      [(ngModel)]="rejectionReason"
+      placeholder="Enter rejection reason..."
+      rows="4"
+    ></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="closeRejectModal()">Cancel</button>
+      <button class="btn btn-reject" (click)="confirmReject()">Reject</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,110 @@
+<div class="manage-products-page">
+  <div class="page-header">
+    <h1>Manage Products</h1>
+    <button class="btn btn-primary" (click)="openAddModal()">+ Add Product</button>
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    <p>Loading products...</p>
+  </div>
+
+  <div class="error" *ngIf="error">
+    <p>{{ error }}</p>
+  </div>
+
+  <div class="products-table-wrapper" *ngIf="!loading && products.length > 0">
+    <table class="products-table">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Type</th>
+          <th>Price</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of products">
+          <td class="image-cell">
+            <img [src]="product.picture_url" [alt]="product.name" class="product-thumb" *ngIf="product.picture_url">
+            <span class="no-image" *ngIf="!product.picture_url">No image</span>
+          </td>
+          <td>{{ product.name }}</td>
+          <td>{{ product.category_name }}</td>
+          <td>{{ product.product_type }}</td>
+          <td>{{ product.base_price | number:'1.2-2' }}</td>
+          <td class="actions-cell">
+            <button class="btn-edit" (click)="openEditModal(product)">Edit</button>
+            <button class="btn-delete" (click)="promptDelete(product)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="no-products" *ngIf="!loading && products.length === 0">
+    <p>No products found. Add your first product!</p>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h2>{{ editingProduct ? 'Edit Product' : 'Add New Product' }}</h2>
+
+    <div class="form-group">
+      <label for="productName">Name *</label>
+      <input type="text" id="productName" [(ngModel)]="formName" placeholder="Product name">
+    </div>
+
+    <div class="form-group">
+      <label for="productDescription">Description</label>
+      <textarea id="productDescription" [(ngModel)]="formDescription" placeholder="Product description" rows="3"></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="productPrice">Base Price *</label>
+        <input type="number" id="productPrice" [(ngModel)]="formBasePrice" min="0" step="0.01">
+      </div>
+
+      <div class="form-group">
+        <label for="productType">Product Type *</label>
+        <input type="text" id="productType" [(ngModel)]="formProductType" placeholder="e.g. T-Shirt, Mug">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="productCategory">Category *</label>
+      <select id="productCategory" [(ngModel)]="formCategoryId">
+        <option *ngFor="let cat of categories" [value]="cat.category_id">{{ cat.name }}</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="productPicture">Picture URL</label>
+      <input type="text" id="productPicture" [(ngModel)]="formPictureUrl" placeholder="/images/product.png">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+      <button class="btn btn-primary" (click)="saveProduct()" [disabled]="!formName || !formProductType || !formCategoryId">
+        {{ editingProduct ? 'Save Changes' : 'Add Product' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" *ngIf="productToDelete" (click)="cancelDelete()">
+  <div class="modal modal-small" (click)="$event.stopPropagation()">
+    <h2>Delete Product</h2>
+    <p>Are you sure you want to delete <strong>{{ productToDelete.name }}</strong>?</p>
+    <p class="warning">This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+      <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>

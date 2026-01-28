@@ -43,4 +43,16 @@ export class ProductsService {
   getProduct(id: number): Observable<Product> {
     return this.http.get<Product>(`/api/products/${id}`);
   }
+
+  createProduct(product: Partial<Product>): Observable<Product> {
+    return this.http.post<Product>('/api/products', product);
+  }
+
+  updateProduct(id: number, product: Partial<Product>): Observable<Product> {
+    return this.http.put<Product>(`/api/products/${id}`, product);
+  }
+
+  deleteProduct(id: number): Observable<void> {
+    return this.http.delete<void>(`/api/products/${id}`);
+  }
 }

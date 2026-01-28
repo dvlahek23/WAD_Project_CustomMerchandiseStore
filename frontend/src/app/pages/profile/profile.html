@@ -73,12 +73,6 @@
       </div>
     </div>
 
-    <!-- My Orders (for non-admin users) -->
-    <div class="profile-section" *ngIf="!userService.isAdmin">
-      <h3>My Orders</h3>
-      <p class="profile-empty">You haven't placed any orders yet.</p>
-    </div>
-
     <button class="profile-logout-btn" (click)="logout()">
       Logout
     </button>
@@ -262,6 +256,10 @@
           <button class="pagination-btn" (click)="goToLogPage(currentLogPage + 1)" [disabled]="currentLogPage === totalLogPages">Next &raquo;</button>
         </div>
       </div>
+
+      <button class="btn-export-pdf" (click)="exportLogsToPdf()" *ngIf="logs.length > 0">
+        Export to PDF
+      </button>
     </div>
   </div>
 </div>

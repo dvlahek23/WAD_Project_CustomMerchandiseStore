@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductsService, Product } from '../../core/products.service';
 import { UserService } from '../../core/user';
 import { OrdersService } from '../../core/orders.service';
+import { ReviewsService, Review } from '../../core/reviews.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -63,12 +64,20 @@ export class ProductDetail implements OnInit {
     'Stationery': '#4A7C59',
   };
 
+  // Reviews
+  reviews: Review[] = [];
+  loadingReviews = false;
+  newReviewRating = 5;
+  newReviewComment = '';
+  submittingReview = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private productsService: ProductsService,
     public userService: UserService,
     private ordersService: OrdersService,
+    private reviewsService: ReviewsService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -87,12 +96,156 @@ export class ProductDetail implements OnInit {
       next: (product) => {
         this.product = product;
         this.loading = false;
+        this.loadReviews(id);
         this.cdr.detectChanges();
       },
       error: () => {
         this.error = 'Product not found';
         this.loading = false;
         this.cdr.detectChanges();
+      }
+    });
+  }
+
+  loadReviews(productId: number) {
+    this.loadingReviews = true;
+    this.reviewsService.getReviews(productId).subscribe({
+      next: (reviews) => {
+        this.reviews = reviews;
+        this.loadingReviews = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loadingReviews = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  get canAddReview(): boolean {
+    // User must be logged in and not a control user
+    return this.userService.isLoggedIn &&
+           this.userService.user?.role?.toLowerCase() !== 'control';
+  }
+
+  get averageRating(): number {
+    if (this.reviews.length === 0) return 0;
+    const sum = this.reviews.reduce((acc, r) => acc + r.rating, 0);
+    return sum / this.reviews.length;
+  }
+
+  // Star distribution for pie chart
+  get starDistribution(): { star: number; count: number; percentage: number; color: string }[] {
+    const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e']; // 1-5 stars colors
+    const counts = [0, 0, 0, 0, 0];
+
+    this.reviews.forEach(r => {
+      if (r.rating >= 1 && r.rating <= 5) {
+        counts[r.rating - 1]++;
+      }
+    });
+
+    const total = this.reviews.length || 1;
+    return counts.map((count, i) => ({
+      star: i + 1,
+      count,
+      percentage: (count / total) * 100,
+      color: colors[i]
+    }));
+  }
+
+  // Generate SVG pie chart segments
+  get pieChartSegments(): { path: string; color: string; star: number; percentage: number }[] {
+    const segments: { path: string; color: string; star: number; percentage: number }[] = [];
+    const distribution = this.starDistribution.filter(d => d.count > 0);
+
+    if (distribution.length === 0) return segments;
+
+    let currentAngle = -90; // Start from top
+    const cx = 50, cy = 50, r = 40;
+
+    distribution.forEach(d => {
+      const angle = (d.percentage / 100) * 360;
+      const startAngle = currentAngle;
+      const endAngle = currentAngle + angle;
+
+      // Convert angles to radians
+      const startRad = (startAngle * Math.PI) / 180;
+      const endRad = (endAngle * Math.PI) / 180;
+
+      // Calculate arc points
+      const x1 = cx + r * Math.cos(startRad);
+      const y1 = cy + r * Math.sin(startRad);
+      const x2 = cx + r * Math.cos(endRad);
+      const y2 = cy + r * Math.sin(endRad);
+
+      // Large arc flag (1 if angle > 180)
+      const largeArc = angle > 180 ? 1 : 0;
+
+      // Create SVG path
+      const path = `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+
+      segments.push({
+        path,
+        color: d.color,
+        star: d.star,
+        percentage: d.percentage
+      });
+
+      currentAngle = endAngle;
+    });
+
+    return segments;
+  }
+
+  submitReview() {
+    if (!this.product || !this.canAddReview) return;
+
+    this.submittingReview = true;
+    this.reviewsService.createReview({
+      product_id: this.product.product_id,
+      rating: this.newReviewRating,
+      comment: this.newReviewComment || undefined
+    }).subscribe({
+      next: () => {
+        this.newReviewComment = '';
+        this.newReviewRating = 5;
+        this.loadReviews(this.product!.product_id);
+        this.submittingReview = false;
+      },
+      error: (err) => {
+        alert(err.error?.error || 'Failed to submit review');
+        this.submittingReview = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  formatDate(dateStr: string): string {
+    return new Date(dateStr).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
+
+  canDeleteReview(review: Review): boolean {
+    // User can delete if they own the review OR are admin
+    return this.userService.isLoggedIn && (
+      review.customer_id === this.userService.user?.user_id ||
+      this.userService.isAdmin
+    );
+  }
+
+  deleteReview(review: Review) {
+    if (!confirm('Are you sure you want to delete this review?')) return;
+
+    this.reviewsService.deleteReview(review.review_id).subscribe({
+      next: () => {
+        this.loadReviews(this.product!.product_id);
+      },
+      error: (err) => {
+        alert(err.error?.error || 'Failed to delete review');
       }
     });
   }

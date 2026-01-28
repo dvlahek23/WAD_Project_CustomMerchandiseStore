@@ -21,14 +21,14 @@ const rawDb = new sqlite3.Database(dbPath, (err) => {
 // Migration helper - add column if it doesn't exist
 function addColumnIfNotExists(table: string, column: string, type: string): Promise<void> {
   return new Promise((resolve) => {
-    rawDb.all(`PRAGMA table_info(${table})`, (err, rows: any[]) => {
+    rawDb.all(`PRAGMA table_info("${table}")`, (err, rows: any[]) => {
       if (err || !rows) {
         resolve();
         return;
       }
       const exists = rows.some(r => r.name === column);
       if (!exists) {
-        rawDb.run(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`, (err2) => {
+        rawDb.run(`ALTER TABLE "${table}" ADD COLUMN "${column}" ${type}`, (err2) => {
           if (!err2) console.log(`Added column ${column} to ${table}`);
           resolve();
         });

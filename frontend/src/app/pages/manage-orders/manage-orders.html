@@ -1,0 +1,109 @@
+<div class="manage-orders-page">
+  <h1>Manage Orders</h1>
+
+  <div class="tabs">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'pending'"
+      (click)="setTab('pending')"
+    >
+      Ready to Ship ({{ pendingOrders.length }})
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'all'"
+      (click)="setTab('all')"
+    >
+      All Orders ({{ allOrders.length }})
+    </button>
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    <p>Loading orders...</p>
+  </div>
+
+  <div class="error" *ngIf="error">
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Pending Shipment Tab -->
+  <div class="tab-content" *ngIf="!loading && activeTab === 'pending'">
+    <div class="no-orders" *ngIf="pendingOrders.length === 0">
+      <p>No orders ready for shipment.</p>
+    </div>
+
+    <div class="orders-list" *ngIf="pendingOrders.length > 0">
+      <div class="order-card" *ngFor="let order of pendingOrders">
+        <div class="order-header">
+          <div class="order-info">
+            <span class="order-id">Order #{{ order.order_id }}</span>
+            <span class="customer-name">{{ order.customer_name }}</span>
+          </div>
+          <span class="order-date">Paid: {{ formatDate(order.paid_at) }}</span>
+        </div>
+
+        <div class="order-content">
+          <div class="product-preview">
+            <img [src]="order.picture_url" [alt]="order.product_name" class="product-image">
+          </div>
+
+          <div class="order-details">
+            <h3>{{ order.product_name }}</h3>
+            <p class="quantity">Quantity: {{ order.quantity }}</p>
+            <p *ngIf="order.custom_text">Custom Text: "{{ order.custom_text }}"</p>
+            <p class="total">Total: {{ order.total_amount | number:'1.2-2' }}</p>
+            <p class="payment-method" *ngIf="order.payment_method">
+              Payment: {{ order.payment_method }}
+            </p>
+          </div>
+        </div>
+
+        <div class="order-actions">
+          <button class="btn btn-primary" (click)="shipOrder(order)">
+            Mark as Shipped
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- All Orders Tab -->
+  <div class="tab-content" *ngIf="!loading && activeTab === 'all'">
+    <div class="no-orders" *ngIf="allOrders.length === 0">
+      <p>No orders found.</p>
+    </div>
+
+    <div class="orders-table-wrapper" *ngIf="allOrders.length > 0">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Designer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of allOrders">
+            <td>#{{ order.order_id }}</td>
+            <td>{{ order.customer_name }}</td>
+            <td>{{ order.product_name }}</td>
+            <td>{{ order.quantity }}</td>
+            <td>{{ order.total_amount | number:'1.2-2' }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(order.status)">
+                {{ getStatusLabel(order.status) }}
+              </span>
+            </td>
+            <td>{{ formatDate(order.order_date) }}</td>
+            <td>{{ order.designer_name || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

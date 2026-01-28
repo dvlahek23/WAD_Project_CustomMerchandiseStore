@@ -21,7 +21,13 @@ app.use(session({
   secret: 'super-secret-key',
   resave: false,
   saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  },
 }));
+
 
 
 app.get('/api/hello', (_req, res) => {
