@@ -2,7 +2,7 @@ import { db } from './db/initDb';
 import { seedDatabase } from './db/seed';
 import app from './index';
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 12164;
 
 db.ready().then(() => {
   return seedDatabase();
